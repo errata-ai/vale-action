@@ -1,16 +1,17 @@
 {
-  "name": "container-toolkit-template",
-  "version": "0.0.0",
-  "description": "Container template action using actions/toolkit",
+  "name": "vale-action",
+  "version": "0.1.0",
+  "description": "The official GitHub Action for Vale -- install, manage, and run Vale with ease.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
+    "build-min": "ncc build src/main.ts --minify",
     "format": "prettier --write **/*.ts",
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/container-toolkit-template.git"
+    "url": "git+https://github.com/errata-ai/vale-action.git"
   },
   "keywords": [
     "actions",
@@ -18,22 +19,28 @@
     "toolkit",
     "setup"
   ],
-  "author": "GitHub",
+  "author": "jdkato",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/actions/container-toolkit-template/issues"
+    "url": "https://github.com/errata-ai/vale-action/issues"
   },
-  "homepage": "https://github.com/actions/container-toolkit-template#readme",
+  "homepage": "https://github.com/errata-ai/vale-action",
   "dependencies": {
     "@actions/core": "^1.0.0",
-    "@actions/io": "^1.0.0",
     "@actions/exec": "^1.0.0",
     "@actions/github": "^1.0.0",
-    "@actions/tool-cache": "^1.0.0"
+    "@actions/io": "^1.0.0",
+    "@actions/tool-cache": "^1.0.0",
+    "@types/request-promise-native": "^1.0.17",
+    "@types/tmp": "^0.1.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "tmp": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",
     "@types/node": "^12.0.4",
+    "@zeit/ncc": "^0.20.5",
     "jest": "^24.8.0",
     "jest-circus": "^24.7.1",
     "prettier": "^1.17.1",
