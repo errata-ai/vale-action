@@ -1,10 +1,28 @@
-name: 'Container Action Template'
-description: 'Get started with Container actions'
-author: 'GitHub'
-inputs: 
-  myInput:
-    description: 'Input to use'
-    default: 'world'
+name: Vale
+description: The official GitHub Action for Vale -- install, manage, and run Vale with ease.
+author: jdkato
+branding:
+  icon: check
+  color: orange
+
+inputs:
+  styles:
+    description: A list of styles to install prior to running Vale.
+    required: false
+
+  config:
+    description: An externally-hosted configuration file to use.
+    required: false
+
+  files:
+    description: 'The files to lint: "all" or "<some_folder>".'
+    required: false
+    default: all
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.styles }}
+    - ${{ inputs.config }}
+    - ${{ inputs.files }}
