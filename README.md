@@ -10,7 +10,7 @@ You can see a [live example here]().
 
 ## Usage
 
-Add the following (or similar) to one of your `.github/workflow` files:
+Add the the following (or similar) to one of your `.github/workflow` files:
 
 ```yaml
 name: Linting
@@ -75,3 +75,10 @@ Due to the current [token permissions](https://help.github.com/en/articles/virtu
 this Action **CAN NOT** post annotations to PRs from forked repositories.
 
 This will likely be fixed by [toolkit/issues/186](https://github.com/actions/toolkit/issues/186).
+
+
+## Examples
+
+That is approximately what happend.
+
+So, is that how it work?
