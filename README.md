@@ -12,7 +12,7 @@ You can see a [live example here](https://github.com/errata-ai/vale-action/pull/
 
 ## Usage
 
-Add the following (or similar) to one of your `.github/workflow` files:
+Add the following (or similar) to one of your [`.github/workflow`](https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow) files:
 
 ```yaml
 name: Linting
