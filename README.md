@@ -73,6 +73,30 @@ with:
 
 It accepts values of either `all` (your repo's root directory) or a specific sub-directory (shown above).
 
+## Repository Structure
+
+The recommended repository structure makes use of the existing `.github` directory to hold all of our Vale-related resources:
+
+```text
+.github
+├── CONTRIBUTING.md
+├── ISSUE_TEMPLATE.md
+├── styles
+│   └── vocab.txt
+└── workflows
+    └── main.yml
+```
+
+Where `styles` represents your [`StylesPath`](https://errata-ai.github.io/vale/styles/). You can then have a top-level `.vale.ini` file that references this directory:
+
+```ini
+StylesPath = .github/styles
+MinAlertLevel = suggestion
+
+[*.md]
+BasedOnStyles = Vale
+```
+
 ## Limitations
 
 Due to the current [token permissions](https://help.github.com/en/articles/virtual-environments-for-github-actions#token-permissions),
