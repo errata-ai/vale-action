@@ -1,26 +1,19 @@
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import * as github from '@actions/github';
 
 import * as tmp from 'tmp';
+import execa = require('execa');
 
 import {CheckRunner} from './check';
 import * as input from './input';
 
 export async function run(actionInput: input.Input): Promise<void> {
   const startedAt = new Date().toISOString();
+  const alertResp = await execa('vale', actionInput.args);
 
-  let output = '';
-  await exec.exec('vale', actionInput.args, {
-    silent: true,
-    cwd: actionInput.workspace,
-    listeners: {
-      stdout: (buffer: Buffer) => output = buffer.toString().trim(),
-    }
-  });
   let runner = new CheckRunner();
+  runner.makeAnnotations(alertResp.stdout);
 
-  runner.makeAnnotations(output);
   await runner.executeCheck({
     token: actionInput.token,
     name: 'Vale',
@@ -28,9 +21,7 @@ export async function run(actionInput: input.Input): Promise<void> {
     repo: github.context.repo.repo,
     head_sha: github.context.sha,
     started_at: startedAt,
-    context: {
-      vale: actionInput.version
-    }
+    context: {vale: actionInput.version}
   });
 }
 
