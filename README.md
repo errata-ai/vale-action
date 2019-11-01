@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@master
 
     - name: Vale
-      uses: errata-ai/vale-action@v1.0.0
+      uses: errata-ai/vale-action@v1.0.1
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
