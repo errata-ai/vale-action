@@ -1,4 +1,4 @@
-name: Vale
+name: Vale-Linter-Action
 description: The official GitHub Action for Vale -- install, manage, and run Vale with ease.
 author: jdkato
 branding:
