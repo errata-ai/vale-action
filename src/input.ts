@@ -54,15 +54,13 @@ export async function get(tmp: any): Promise<Input> {
   version = version.split(' ').slice(-1)[0];
 
   // Install our user-specified styles:
-  const styles = core.getInput('styles').split(' ');
+  const styles = core.getInput('styles').split('\n');
   for (const style of styles) {
     if (style !== '') {
       const name = style.split('/').slice(-1)[0].split('.zip')[0];
       core.info(`Installing style '${name}' ...`);
       await exec.exec('vale', ['install', name, style], {
-        cwd: workspace,
-        silent: true,
-        ignoreReturnCode: true
+        cwd: workspace
       });
     }
   }
