@@ -6,17 +6,6 @@ import * as path from 'path';
 import * as request from 'request-promise-native';
 
 /**
- * These environment variables are exposed for GitHub Actions.
- *
- * See https://bit.ly/2WlFUD7 for more information.
- */
-const {
-  GITHUB_TOKEN,
-  GITHUB_WORKSPACE
-} = process.env;
-
-
-/**
  * Our expected input.
  *
  * @token is automatically created; see https://bit.ly/336fZSk.
@@ -26,24 +15,13 @@ const {
  * @args are Vale's run-time arguments.
  */
 export interface Input {
-  token: string,
-  workspace: string,
-  version: string,
-  args: string[]
+  token: string, workspace: string, version: string, args: string[]
 }
 
 /**
  * Parse our user input and set up our Vale environment.
  */
-export async function get(tmp: any): Promise<Input> {
-  // Add Vale, as copied in Docker, to the `$PATH` for later use:
-  //
-  // NOTE: This *should* be done already by the container `jdkato/vale`.
-  core.addPath('/bin');
-
-  const userToken = GITHUB_TOKEN as string;
-  const workspace = GITHUB_WORKSPACE as string;
-
+export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   // Get the current version of Vale:
   let version = '';
   await exec.exec('vale', ['-v'], {
@@ -53,21 +31,11 @@ export async function get(tmp: any): Promise<Input> {
   });
   version = version.split(' ').slice(-1)[0];
 
-  // Install our user-specified styles:
-  const styles = core.getInput('styles').split('\n');
-  for (const style of styles) {
-    if (style !== '') {
-      const name = style.split('/').slice(-1)[0].split('.zip')[0];
-      core.info(`Installing style '${name}' ...`);
-      await exec.exec('vale', ['install', name, style], {
-        cwd: workspace
-      });
-    }
-  }
-
   let args: string[] = ['--no-exit', '--output=JSON'];
-
-  // Check if we were given an external config file:
+  // Check if we were given an external config file.
+  //
+  // NOTE: We need to do this first because we may not have a local config file
+  // to read the `StylesPath` from.
   const config = core.getInput('config');
   if (config !== '') {
     core.info(`Downloading external config '${config}' ...`);
@@ -87,20 +55,35 @@ export async function get(tmp: any): Promise<Input> {
         });
   }
 
+  // Install our user-specified styles:
+  const styles = core.getInput('styles').split('\n');
+  for (const style of styles) {
+    if (style !== '') {
+      const name = style.split('/').slice(-1)[0].split('.zip')[0];
+      core.info(`Installing style '${name}' ...`);
+
+      let cmd = ['install', name, style];
+      if (args.length > 2) {
+        cmd = args.concat(cmd);
+      }
+      await exec.exec('vale', cmd, {cwd: dir});
+    }
+  }
+
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
   if (files == 'all') {
     args.push('.');
-  } else if (fs.existsSync(path.resolve(workspace, files))) {
-      args.push(files)
+  } else if (fs.existsSync(path.resolve(dir, files))) {
+    args.push(files)
   } else {
     core.warning(
-      `User-specified path (${files}) doesn't exist; falling back to 'all'.`)
+        `User-specified path (${files}) doesn't exist; falling back to 'all'.`)
     args.push('.');
   }
 
   core.info(`Vale set-up comeplete; using '${args}'.`);
   return {
-    token: userToken, workspace: workspace, args: args, version: version
+    token: tok, workspace: dir, args: args, version: version
   }
 }
