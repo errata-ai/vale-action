@@ -1,6 +1,6 @@
 {
   "name": "vale-action",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The official GitHub Action for Vale -- install, manage, and run Vale with ease.",
   "main": "lib/main.js",
   "scripts": {
