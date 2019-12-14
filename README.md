@@ -43,9 +43,11 @@ The recommended repository structure makes use of the existing `.github` directo
 │   └── vocab.txt
 └── workflows
     └── main.yml
+.vale.ini
+...
 ```
 
-Where `styles` represents your [`StylesPath`](https://errata-ai.github.io/vale/styles/). You can then have a top-level `.vale.ini` file that references this directory:
+Where `styles` represents your [`StylesPath`](https://errata-ai.github.io/vale/styles/). The top-level `.vale.ini` file should reference this directory:
 
 ```ini
 StylesPath = .github/styles
