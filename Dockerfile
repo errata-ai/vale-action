@@ -1,14 +1,11 @@
-# NOTE: `jdkato/vale` installs Python 3 already, so we can simply use `pip3`
-# to install other Python libraries.
-#
-# Vale is installed to `/vale`.
+# `jdkato/vale` installs Vale to `/bin/vale`.
 FROM jdkato/vale
 
 RUN apk add --no-cache --update nodejs nodejs-npm
 
-COPY . .
+COPY lib /lib
+COPY package.json /package.json
 
-RUN bin/vale -v
 RUN npm install --production
 
 ENTRYPOINT ["node", "/lib/main.js"]

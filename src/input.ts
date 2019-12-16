@@ -19,17 +19,31 @@ export interface Input {
 }
 
 /**
+ * Log debugging information to `stdout`.
+ *
+ * @msg is the message to log.
+ */
+function logIfDebug(msg: string) {
+  const debug = (core.getInput('debug') == 'true');
+  if (debug) {
+    core.info(msg);
+  }
+}
+
+/**
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   // Get the current version of Vale:
   let version = '';
   await exec.exec('vale', ['-v'], {
+    silent: true,
     listeners: {
       stdout: (buffer: Buffer) => version = buffer.toString().trim(),
     }
   });
   version = version.split(' ').slice(-1)[0];
+  logIfDebug(`Using Vale ${version}`);
 
   let args: string[] = ['--no-exit', '--output=JSON'];
   // Check if we were given an external config file.
@@ -38,7 +52,7 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   // to read the `StylesPath` from.
   const config = core.getInput('config');
   if (config !== '') {
-    core.info(`Downloading external config '${config}' ...`);
+    logIfDebug(`Downloading external config '${config}' ...`);
     await request.get(config)
         .catch((error) => {
           core.warning(`Failed to fetch remote config: ${error}.`);
@@ -46,7 +60,7 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
         .then((body) => {
           try {
             fs.writeFileSync(tmp.name, body);
-            core.info(`Successfully fetched remote config.`);
+            logIfDebug(`Successfully fetched remote config.`);
             args.push('--mode-rev-compat');
             args.push(`--config=${tmp.name}`);
           } catch (e) {
@@ -60,13 +74,13 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   for (const style of styles) {
     if (style !== '') {
       const name = style.split('/').slice(-1)[0].split('.zip')[0];
-      core.info(`Installing style '${name}' ...`);
+      logIfDebug(`Installing style '${name}' ...`);
 
       let cmd = ['install', name, style];
       if (args.length > 2) {
         cmd = args.concat(cmd);
       }
-      await exec.exec('vale', cmd, {cwd: dir});
+      await exec.exec('vale', cmd, {cwd: dir, silent: true});
     }
   }
 
@@ -82,7 +96,7 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
     args.push('.');
   }
 
-  core.info(`Vale set-up comeplete; using '${args}'.`);
+  logIfDebug(`Vale set-up comeplete; using '${args}'.`);
   return {
     token: tok, workspace: dir, args: args, version: version
   }

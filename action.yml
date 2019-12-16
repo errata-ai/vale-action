@@ -19,6 +19,11 @@ inputs:
     required: false
     default: all
 
+  debug:
+    description: 'Log debugging information to stdout'
+    required: false
+    default: 'false'
+
 runs:
   using: docker
   image: Dockerfile
@@ -26,3 +31,4 @@ runs:
     - ${{ inputs.styles }}
     - ${{ inputs.config }}
     - ${{ inputs.files }}
+    - ${{ inputs.debug }}
