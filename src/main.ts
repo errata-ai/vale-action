@@ -19,9 +19,6 @@ const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
 export async function run(actionInput: input.Input): Promise<void> {
   const alertResp = await execa('vale', actionInput.args);
   core.info(alertResp.stdout);
-
-  const matchersPath = path.join(__dirname, '..', '.github');
-  core.info(`##[add-matcher]${path.join(matchersPath, 'vale.json')}`);
 }
 
 async function main(): Promise<void> {
