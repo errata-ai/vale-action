@@ -2,7 +2,9 @@
 
 echo "Running Vale ..."
 
-cp /vale.json "$HOME/"
-echo "::add-matcher::$HOME/vale.json"
+matcher_path=`pwd`/vale.json
+cp /vale.json "$matcher_path"
+
+echo "::add-matcher::vale.json"
 
 node /lib/main.js
