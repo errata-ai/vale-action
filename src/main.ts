@@ -1,7 +1,9 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
+import * as path from 'path';
 import * as tmp from 'tmp';
+
 import execa = require('execa');
 
 import {CheckRunner} from './check';
@@ -15,21 +17,11 @@ import * as input from './input';
 const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
 
 export async function run(actionInput: input.Input): Promise<void> {
-  const startedAt = new Date().toISOString();
   const alertResp = await execa('vale', actionInput.args);
+  core.info(alertResp.stdout);
 
-  let runner = new CheckRunner();
-  runner.makeAnnotations(alertResp.stdout);
-
-  await runner.executeCheck({
-    token: actionInput.token,
-    name: 'Vale',
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    head_sha: github.context.sha,
-    started_at: startedAt,
-    context: {vale: actionInput.version}
-  });
+  const matchersPath = path.join(__dirname, '..', '.github');
+  core.info(`##[add-matcher]${path.join(matchersPath, 'vale.json')}`);
 }
 
 async function main(): Promise<void> {
