@@ -45,7 +45,7 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   version = version.split(' ').slice(-1)[0];
   logIfDebug(`Using Vale ${version}`);
 
-  let args: string[] = ['--no-exit', '--output=JSON'];
+  let args: string[] = ['--no-exit', '--no-wrap'];
   // Check if we were given an external config file.
   //
   // NOTE: We need to do this first because we may not have a local config file
