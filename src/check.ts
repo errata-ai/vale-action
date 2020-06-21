@@ -1,10 +1,11 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as octokit from '@octokit/rest';
 
+const colorize = require('json-colorizer');
 const pkg = require('../package.json');
 const USER_AGENT = `${pkg.name}/${pkg.version} (${pkg.bugs.url})`;
 
+type ChecksCreateParamsOutputAnnotations = any;
 type Severity = 'suggestion'|'warning'|'error';
 
 interface Alert {
@@ -43,7 +44,7 @@ interface CheckOptions {
  * See https://developer.github.com/v3/checks.
  */
 export class CheckRunner {
-  private annotations: Array<octokit.ChecksCreateParamsOutputAnnotations>;
+  private annotations: Array<ChecksCreateParamsOutputAnnotations>;
   private stats: Stats;
 
   constructor() {
@@ -91,7 +92,7 @@ export class CheckRunner {
   public async executeCheck(options: CheckOptions): Promise<void> {
     core.info(`Vale: ${this.getSummary()}`);
 
-    const client = new github.GitHub(options.token, {
+    const client = github.getOctokit(options.token, {
       userAgent: USER_AGENT,
     });
 
@@ -131,7 +132,7 @@ export class CheckRunner {
    *
    * See https://developer.github.com/v3/checks/runs/#create-a-check-run.
    */
-  private async createCheck(client: github.GitHub, options: CheckOptions):
+  private async createCheck(client: any, options: CheckOptions):
       Promise<number> {
     const response = await client.checks.create({
       owner: options.owner,
@@ -153,7 +154,7 @@ export class CheckRunner {
    * multiple "buckets" if we have more than 50.
    */
   private async runUpdateCheck(
-      client: github.GitHub, checkRunId: number,
+      client: any, checkRunId: number,
       options: CheckOptions): Promise<void> {
     let annotations = this.getBucket();
 
@@ -195,7 +196,7 @@ export class CheckRunner {
    * Indicate that no alerts were found.
    */
   private async successCheck(
-      client: github.GitHub, checkRunId: number,
+      client: any, checkRunId: number,
       options: CheckOptions): Promise<void> {
     let req: any = {
       owner: options.owner,
@@ -224,7 +225,7 @@ export class CheckRunner {
    * Something went wrong; cancel the check run and report the exception.
    */
   private async cancelCheck(
-      client: github.GitHub, checkRunId: number,
+      client: any, checkRunId: number,
       options: CheckOptions): Promise<void> {
     let req: any = {
       owner: options.owner,
@@ -259,9 +260,7 @@ export class CheckRunner {
    * TODO: Nicer formatting?
    */
   private dumpToStdout() {
-    for (const annotation of this.annotations) {
-      core.info(annotation.message);
-    }
+    console.log(colorize(JSON.stringify(this.annotations)));
   }
 
   /**
@@ -269,8 +268,8 @@ export class CheckRunner {
    *
    * See https://developer.github.com/v3/checks/runs/#output-object.
    */
-  private getBucket(): Array<octokit.ChecksCreateParamsOutputAnnotations> {
-    let annotations: Array<octokit.ChecksCreateParamsOutputAnnotations> = [];
+  private getBucket(): Array<ChecksCreateParamsOutputAnnotations> {
+    let annotations: Array<ChecksCreateParamsOutputAnnotations> = [];
     while (annotations.length < 50) {
       const annotation = this.annotations.pop();
       if (annotation) {
@@ -343,9 +342,9 @@ export class CheckRunner {
    * See https://developer.github.com/v3/checks/runs/#annotations-object.
    */
   static makeAnnotation(name: string, alert: Alert):
-      octokit.ChecksCreateParamsOutputAnnotations {
+      ChecksCreateParamsOutputAnnotations {
     let annotation_level:
-        octokit.ChecksCreateParamsOutputAnnotations['annotation_level'];
+        ChecksCreateParamsOutputAnnotations['annotation_level'];
 
     switch (alert.Severity) {
       case 'suggestion':
@@ -359,7 +358,7 @@ export class CheckRunner {
         break;
     }
 
-    let annotation: octokit.ChecksCreateParamsOutputAnnotations = {
+    let annotation: ChecksCreateParamsOutputAnnotations = {
       path: name,
       start_line: alert.Line,
       end_line: alert.Line,

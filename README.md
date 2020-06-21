@@ -2,13 +2,9 @@
 
 > :octocat: The official GitHub Action for Vale -- install, manage, and run Vale with ease.
 
-This GitHub Action executes [Vale](https://github.com/errata-ai/vale) and displays its alerts as annotations in GitHub's "Files changed" UI:
-
 <p align="center">
-  <img width="495" alt="demo" src="https://user-images.githubusercontent.com/8785025/67726924-bf3e6180-f9a4-11e9-9c32-2233756731b9.png">
+  <img width="50%" alt="A demo screenshot." src="https://user-images.githubusercontent.com/8785025/85236358-272d3680-b3d2-11ea-8793-0f45cb70189a.png">
 </p>
-
-You can see a [live example here](https://github.com/errata-ai/vale-action/pull/1/commits/2e3b1e76e3b6412ea9577701218aba19470f87bb).
 
 ## Usage
 
@@ -26,8 +22,20 @@ jobs:
       uses: actions/checkout@master
 
     - name: Vale
-      uses: errata-ai/vale-action@v1.0.4
+      uses: errata-ai/vale-action@v1.2.0
+      with:
+        # Optional
+        styles: |
+          https://github.com/errata-ai/Microsoft/releases/latest/download/Microsoft.zip
+          https://github.com/errata-ai/write-good/releases/latest/download/write-good.zip
+
+        # Optional
+        config: https://raw.githubusercontent.com/errata-ai/vale/master/.vale.ini
+
+        # Optional
+        files: path/to/lint
       env:
+        # Required
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 
@@ -37,8 +45,6 @@ The recommended repository structure makes use of the existing `.github` directo
 
 ```text
 .github
-├── CONTRIBUTING.md
-├── ISSUE_TEMPLATE.md
 ├── styles
 │   └── vocab.txt
 └── workflows
