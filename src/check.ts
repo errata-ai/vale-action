@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-const colorize = require('json-colorizer');
 const pkg = require('../package.json');
 const USER_AGENT = `${pkg.name}/${pkg.version} (${pkg.bugs.url})`;
 
@@ -260,7 +259,7 @@ export class CheckRunner {
    * TODO: Nicer formatting?
    */
   private dumpToStdout() {
-    console.log(colorize(JSON.stringify(this.annotations)));
+    console.dir(this.annotations, {depth: null, colors: true})
   }
 
   /**

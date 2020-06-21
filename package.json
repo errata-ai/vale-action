@@ -32,7 +32,6 @@
     "@types/request-promise-native": "^1.0.17",
     "@types/tmp": "^0.1.0",
     "execa": "^3.2.0",
-    "json-colorizer": "^2.2.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "tmp": "^0.1.0"
