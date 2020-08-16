@@ -91,9 +91,16 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   } else if (fs.existsSync(path.resolve(dir, files))) {
     args.push(files)
   } else {
-    core.warning(
-        `User-specified path (${files}) doesn't exist; falling back to 'all'.`)
-    args.push('.');
+    try {
+      // Support for an array of inputs.
+      //
+      // e.g., '[".github/workflows/main.yml"]'
+      args = args.concat(JSON.parse(files));
+    } catch (e) {
+      core.warning(
+        `User-specified path (${files}) is invalid; falling back to 'all'.`)
+      args.push('.');
+    }
   }
 
   logIfDebug(`Vale set-up comeplete; using '${args}'.`);
