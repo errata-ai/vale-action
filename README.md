@@ -22,7 +22,7 @@ jobs:
       uses: actions/checkout@master
 
     - name: Vale
-      uses: errata-ai/vale-action@v1.2.0
+      uses: errata-ai/vale-action@v1.3.0
       with:
         # Optional
         styles: |
@@ -103,7 +103,38 @@ with:
   files: path/to/lint
 ```
 
-It accepts values of either `all` (your repo's root directory) or a specific sub-directory (shown above).
+You can supply this value one of three ways:
+
+- `files: all` (default): The repo's root directory; equivalent to calling `vale .`.
+
+- `files: path/to/lint`: A single file or directory; equivalent to calling `vale path/to/lint`.
+
+- `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
+
+#### Linting only modified files
+
+A common request is to only run Vale on *modified* files. We can make use of the `files` option and the [`file-changes-action`](https://github.com/marketplace/actions/file-changes-action) to do this:
+
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: File Changes
+      id: file_changes
+      uses: trilom/file-changes-action@v1.2.3
+
+    - name: Vale
+      uses: errata-ai/vale-action@v1.3.0
+      with:
+        files: '${{ steps.file_changes.outputs.files_modified }}'
+
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+```
 
 ## Limitations
 
