@@ -19,6 +19,11 @@ inputs:
     required: false
     default: all
 
+  onlyAnnotateModifiedLines:
+    description: Only post annotations on lines that have changed within a PR.
+    required: false
+    default: 'false'
+
   debug:
     description: 'Log debugging information to stdout'
     required: false
@@ -31,4 +36,5 @@ runs:
     - ${{ inputs.styles }}
     - ${{ inputs.config }}
     - ${{ inputs.files }}
+    - ${{ inputs.onlyAnnotateModifiedLines }}
     - ${{ inputs.debug }}

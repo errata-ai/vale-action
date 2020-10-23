@@ -4,6 +4,7 @@ import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as request from 'request-promise-native';
+import {modifiedFilesInPR} from './git';
 
 /**
  * Our expected input.
@@ -93,7 +94,12 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
-  if (files == 'all') {
+  if (
+    core.getInput('onlyAnnotateModifiedLines') != 'false' ||
+    files == '__onlyModified'
+  ) {
+    args = args.concat(modifiedFilesInPR());
+  } else if (files == 'all') {
     args.push('.');
   } else if (fs.existsSync(path.resolve(dir, files))) {
     args.push(files);
