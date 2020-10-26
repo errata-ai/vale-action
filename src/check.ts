@@ -5,7 +5,7 @@ const pkg = require('../package.json');
 const USER_AGENT = `${pkg.name}/${pkg.version} (${pkg.bugs.url})`;
 
 type ChecksCreateParamsOutputAnnotations = any;
-type Severity = 'suggestion'|'warning'|'error';
+type Severity = 'suggestion' | 'warning' | 'error';
 
 interface Alert {
   readonly Check: string;
@@ -20,21 +20,21 @@ interface ValeJSON {
 }
 
 interface Stats {
-  suggestions: number,
-  warnings: number,
-  errors: number,
+  suggestions: number;
+  warnings: number;
+  errors: number;
 }
 
 interface CheckOptions {
-  token: string,
-  owner: string,
-  repo: string,
-  name: string,
-  head_sha: string,
-  started_at: string,  // ISO8601
+  token: string;
+  owner: string;
+  repo: string;
+  name: string;
+  head_sha: string;
+  started_at: string; // ISO8601
   context: {
-    vale: string
-  }
+    vale: string;
+  };
 }
 
 /**
@@ -51,8 +51,8 @@ export class CheckRunner {
     this.stats = {
       suggestions: 0,
       warnings: 0,
-      errors: 0,
-    }
+      errors: 0
+    };
   }
 
   /**
@@ -92,7 +92,7 @@ export class CheckRunner {
     core.info(`Vale: ${this.getSummary()}`);
 
     const client = github.getOctokit(options.token, {
-      userAgent: USER_AGENT,
+      userAgent: USER_AGENT
     });
 
     let checkRunId: number;
@@ -101,7 +101,9 @@ export class CheckRunner {
     } catch (error) {
       // NOTE: `GITHUB_HEAD_REF` is set only for forked repos.
       if (process.env.GITHUB_HEAD_REF) {
-        core.warning(`Unable to create annotations; printing Vale alerts instead.`);
+        core.warning(
+          `Unable to create annotations; printing Vale alerts instead.`
+        );
         this.dumpToStdout();
         if (this.getConclusion() == 'failure') {
           throw new Error('Exiting due to Vale errors');
@@ -131,14 +133,16 @@ export class CheckRunner {
    *
    * See https://developer.github.com/v3/checks/runs/#create-a-check-run.
    */
-  private async createCheck(client: any, options: CheckOptions):
-      Promise<number> {
+  private async createCheck(
+    client: any,
+    options: CheckOptions
+  ): Promise<number> {
     const response = await client.checks.create({
       owner: options.owner,
       repo: options.repo,
       name: options.name,
       head_sha: options.head_sha,
-      status: 'in_progress',
+      status: 'in_progress'
     });
     if (response.status != 201) {
       core.warning(`[createCheck] Unexpected status code ${response.status}`);
@@ -153,8 +157,10 @@ export class CheckRunner {
    * multiple "buckets" if we have more than 50.
    */
   private async runUpdateCheck(
-      client: any, checkRunId: number,
-      options: CheckOptions): Promise<void> {
+    client: any,
+    checkRunId: number,
+    options: CheckOptions
+  ): Promise<void> {
     let annotations = this.getBucket();
 
     while (annotations.length > 0) {
@@ -167,7 +173,7 @@ export class CheckRunner {
           title: options.name,
           summary: this.getSummary(),
           text: this.getText(options.context),
-          annotations: annotations,
+          annotations: annotations
         }
       };
 
@@ -195,8 +201,10 @@ export class CheckRunner {
    * Indicate that no alerts were found.
    */
   private async successCheck(
-      client: any, checkRunId: number,
-      options: CheckOptions): Promise<void> {
+    client: any,
+    checkRunId: number,
+    options: CheckOptions
+  ): Promise<void> {
     let req: any = {
       owner: options.owner,
       repo: options.repo,
@@ -208,7 +216,7 @@ export class CheckRunner {
       output: {
         title: options.name,
         summary: this.getSummary(),
-        text: this.getText(options.context),
+        text: this.getText(options.context)
       }
     };
 
@@ -224,8 +232,10 @@ export class CheckRunner {
    * Something went wrong; cancel the check run and report the exception.
    */
   private async cancelCheck(
-      client: any, checkRunId: number,
-      options: CheckOptions): Promise<void> {
+    client: any,
+    checkRunId: number,
+    options: CheckOptions
+  ): Promise<void> {
     let req: any = {
       owner: options.owner,
       repo: options.repo,
@@ -238,7 +248,7 @@ export class CheckRunner {
         title: options.name,
         summary: 'Unhandled error',
         text:
-            'Check was cancelled due to unhandled error. Check the Action logs for details.',
+          'Check was cancelled due to unhandled error. Check the Action logs for details.'
       }
     };
 
@@ -259,7 +269,7 @@ export class CheckRunner {
    * TODO: Nicer formatting?
    */
   private dumpToStdout() {
-    console.dir(this.annotations, {depth: null, colors: true})
+    console.dir(this.annotations, {depth: null, colors: true});
   }
 
   /**
@@ -313,7 +323,11 @@ export class CheckRunner {
    * No alerts found.
    */
   private isSuccessCheck(): boolean {
-    return this.stats.suggestions == 0 && this.stats.warnings == 0 && this.stats.errors == 0;
+    return (
+      this.stats.suggestions == 0 &&
+      this.stats.warnings == 0 &&
+      this.stats.errors == 0
+    );
   }
 
   /**
@@ -340,10 +354,11 @@ export class CheckRunner {
    *
    * See https://developer.github.com/v3/checks/runs/#annotations-object.
    */
-  static makeAnnotation(name: string, alert: Alert):
-      ChecksCreateParamsOutputAnnotations {
-    let annotation_level:
-        ChecksCreateParamsOutputAnnotations['annotation_level'];
+  static makeAnnotation(
+    name: string,
+    alert: Alert
+  ): ChecksCreateParamsOutputAnnotations {
+    let annotation_level: ChecksCreateParamsOutputAnnotations['annotation_level'];
 
     switch (alert.Severity) {
       case 'suggestion':
@@ -365,7 +380,7 @@ export class CheckRunner {
       end_column: alert.Span[1],
       annotation_level: annotation_level,
       title: `[${alert.Severity}] ${alert.Check}`,
-      message: alert.Message,
+      message: alert.Message
     };
 
     return annotation;
