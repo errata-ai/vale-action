@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import {wasLineAddedInPR} from './git';
 
 const pkg = require('../package.json');
 const USER_AGENT = `${pkg.name}/${pkg.version} (${pkg.bugs.url})`;
@@ -37,6 +38,9 @@ interface CheckOptions {
   };
 }
 
+const onlyAnnotateModifiedLines =
+  core.getInput('onlyAnnotateModifiedLines') != 'false';
+
 /**
  * CheckRunner handles all communication with GitHub's Check API.
  *
@@ -62,6 +66,12 @@ export class CheckRunner {
     const alerts = JSON.parse(output) as ValeJSON;
     for (const filename of Object.getOwnPropertyNames(alerts)) {
       for (const alert of alerts[filename]) {
+        if (
+          onlyAnnotateModifiedLines &&
+          !wasLineAddedInPR(filename, alert.Line)
+        ) {
+          continue;
+        }
         switch (alert.Severity) {
           case 'suggestion':
             this.stats.suggestions += 1;

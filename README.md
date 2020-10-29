@@ -107,33 +107,19 @@ You can supply this value one of three ways:
 
 - `files: all` (default): The repo's root directory; equivalent to calling `vale .`.
 
+- `files: __onlyModified`: Lint only files that have been modified within a PR.
+
 - `files: path/to/lint`: A single file or directory; equivalent to calling `vale path/to/lint`.
 
 - `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
 
-#### Linting only modified files
+### `onlyAnnotateModifiedLines` (default: `false`)
 
-A common request is to only run Vale on *modified* files. We can make use of the `files` option and the [`file-changes-action`](https://github.com/marketplace/actions/file-changes-action) to do this:
+In case you want the action to only annotate lines that have been modified within a PR. This is helpful in case you're introducing vale to a repository that (still) has a lot of lints and don't want to overwhelm everyone.
 
 ```yaml
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - name: File Changes
-      id: file_changes
-      uses: trilom/file-changes-action@v1.2.3
-
-    - name: Vale
-      uses: errata-ai/vale-action@v1.3.0
-      with:
-        files: '${{ steps.file_changes.outputs.files_modified }}'
-
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+with:
+  onlyAnnotateModifiedLines: true
 ```
 
 ## Limitations
