@@ -1,7 +1,14 @@
-# `jdkato/vale` installs Vale to `/bin/vale`.
-FROM jdkato/vale
+FROM node:10.16
 
-RUN apk add --no-cache --update nodejs nodejs-npm git
+# Download Vale
+RUN wget https://github.com/errata-ai/vale/releases/download/v2.6.4/vale_2.6.4_Linux_64-bit.tar.gz
+
+# Unpack tar file
+RUN tar -xvf vale_2.6.4_Linux_64-bit.tar.gz
+
+# Move unpacked vale executable to /usr/local
+RUN mv vale /bin
+ENV PATH=$PATH:/bin/
 
 COPY lib /lib
 COPY package.json /package.json
