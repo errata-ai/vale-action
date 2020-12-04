@@ -387,7 +387,7 @@ export class CheckRunner {
       start_line: alert.Line,
       end_line: alert.Line,
       start_column: alert.Span[0],
-      end_column: alert.Span[1],
+      end_column: alert.Span[1] == 0 ? alert.Span[0] : alert.Span[1],
       annotation_level: annotation_level,
       title: `[${alert.Severity}] ${alert.Check}`,
       message: alert.Message
