@@ -36,6 +36,7 @@ interface CheckOptions {
   context: {
     vale: string;
   };
+  pull_requests: object[];
 }
 
 const onlyAnnotateModifiedLines =
@@ -200,6 +201,23 @@ export class CheckRunner {
       if (response.status != 200) {
         core.warning(`[updateCheck] Unexpected status code ${response.status}`);
       }
+
+      if (options.pull_requests.length > 0) {
+        const pr = options.pull_requests[0];
+
+        const commentResponse = await client.request(`POST /repos/${options.owner}/${options.repo}/issues/{issue_number}/comments`, {
+          owner: options.owner,
+          repo: options.repo,
+          issue_number: pr['number'],
+          body: 'Beep boop i\'m a bot 🤖'
+        })
+
+        if (commentResponse.status != 200) {
+          core.warning(`[updateCheck] Unexpected status code for comment creation ${response.status}`);
+        }
+      }
+
+
 
       annotations = this.getBucket();
     }
