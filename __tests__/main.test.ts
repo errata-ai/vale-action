@@ -7,7 +7,7 @@ describe('GitHub API usage', () => {
   const gh = github.getOctokit(token);
 
   it('should get commits from a PR', async () => {
-    const resp = await gh.request(
+    const resp1 = await gh.request(
       'GET /repos/{owner}/{repo}/pulls/{pull_number}',
       {
         owner: 'errata-ai',
@@ -16,12 +16,21 @@ describe('GitHub API usage', () => {
       }
     );
 
-    const commits = await gh.paginate(`GET ${resp.data.commits_url}`, {
+    // context.payload.pull_request.commits_url
+    const resp2 = await gh.request(`GET ${resp1.data.commits_url}`, {
       owner: 'errata-ai',
       repo: 'vale'
     });
+    expect(resp2.data.length).toEqual(1);
 
-    expect(commits.length).toEqual(1);
+    await Promise.all(resp2.data.map(async (commit) => {
+      const resp3 = await gh.repos.getCommit({
+        owner: 'errata-ai',
+        repo: 'vale',
+        ref: commit.sha
+      });
+      expect(resp3.data.files.length).toEqual(1);
+    }));
   });
 
   it('should get modified lines from a commit', async () => {
