@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import {wasLineAddedInPR} from './git';
+
+import {wasLineAddedInPR, GHFile} from './git';
 
 const pkg = require('../package.json');
 const USER_AGENT = `${pkg.name}/${pkg.version} (${pkg.bugs.url})`;
@@ -49,14 +50,16 @@ const onlyAnnotateModifiedLines =
 export class CheckRunner {
   private annotations: Array<ChecksCreateParamsOutputAnnotations>;
   private stats: Stats;
+  private modified: Record<string, GHFile>;
 
-  constructor() {
+  constructor(modified: Record<string, GHFile>) {
     this.annotations = [];
     this.stats = {
       suggestions: 0,
       warnings: 0,
       errors: 0
     };
+    this.modified = modified;
   }
 
   /**
@@ -68,7 +71,7 @@ export class CheckRunner {
       for (const alert of alerts[filename]) {
         if (
           onlyAnnotateModifiedLines &&
-          !wasLineAddedInPR(filename, alert.Line)
+          !wasLineAddedInPR(this.modified[filename], alert.Line)
         ) {
           continue;
         }

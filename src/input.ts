@@ -4,7 +4,7 @@ import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as request from 'request-promise-native';
-import {modifiedFilesInPR} from './git';
+import {modifiedFiles, GHFile} from './git';
 
 /**
  * Our expected input.
@@ -20,6 +20,7 @@ export interface Input {
   workspace: string;
   version: string;
   args: string[];
+  files: Record<string, GHFile>;
 }
 
 /**
@@ -38,6 +39,8 @@ function logIfDebug(msg: string) {
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
+  let modified: Record<string, GHFile> = {};
+
   // Get the current version of Vale:
   let version = '';
   await exec.exec('vale', ['-v'], {
@@ -88,7 +91,20 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
       if (args.length > 2) {
         cmd = args.concat(cmd);
       }
-      await exec.exec('vale', cmd, {cwd: dir, silent: true});
+      let stderr = '';
+
+      let resp = await exec.exec('vale', cmd, {
+        cwd: dir,
+        listeners: {
+          stderr: (data: Buffer) => {
+            stderr += data.toString();
+          }
+        }
+      });
+
+      if (resp == 2) {
+        core.setFailed(stderr);
+      }
     }
   }
 
@@ -98,7 +114,15 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
     core.getInput('onlyAnnotateModifiedLines') != 'false' ||
     files == '__onlyModified'
   ) {
-    args = args.concat(modifiedFilesInPR());
+    let payload = await modifiedFiles();
+
+    let names = new Set<string>();
+    payload.forEach(file => {
+      names.add(file.name);
+      modified[file.name] = file;
+    });
+
+    args = args.concat(Array.from(names));
   } else if (files == 'all') {
     args.push('.');
   } else if (fs.existsSync(path.resolve(dir, files))) {
@@ -118,10 +142,12 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
   }
 
   logIfDebug(`Vale set-up comeplete; using '${args}'.`);
+
   return {
     token: tok,
     workspace: dir,
     args: args,
-    version: version
+    version: version,
+    files: modified
   };
 }

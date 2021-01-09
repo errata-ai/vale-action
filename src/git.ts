@@ -1,104 +1,121 @@
 import * as github from '@actions/github';
 import * as core from '@actions/core';
 
-const execa = require('execa');
+const API = github.getOctokit(process.env.GITHUB_TOKEN as string);
+const CTX = github.context;
 
-type GitRef = string;
 const cache: Record<string, undefined | number[]> = {};
 
-export function wasLineAddedInPR(filename: string, line: number) {
-  const fromSHA: GitRef | undefined =
-    github.context.payload?.pull_request?.base?.sha;
-  // default to return true when not in the context of a PR.
-  if (!fromSHA) return true;
+export interface GHFile {
+  name: string;
+  patch: string;
+  sha: string;
+}
 
-  const lines: number[] =
-    cache[filename + fromSHA] || addedLines(filename, fromSHA);
-  cache[filename + fromSHA] = lines;
+export function wasLineAddedInPR(file: GHFile, line: number): boolean {
+  let lines: number[] = [];
+
+  const key = file.name + file.sha;
+  if (!CTX.payload.pull_request) {
+    // TODO: What if we're pushing?
+    return true;
+  } else if (key in cache) {
+    lines = cache[key] as number[];
+  } else {
+    lines = parsePatch(file.patch);
+    cache[key] = lines;
+  }
+
   return lines.includes(line);
 }
 
-export function modifiedFilesInPR() {
-  ensureGitHistory();
-  const fromSHA: GitRef | undefined =
-    github.context.payload?.pull_request?.base?.sha;
+export async function modifiedFiles(): Promise<GHFile[]> {
+  let files: GHFile[] = [];
+  let commits: string[] = await getCommits();
 
-  return execa
-    .commandSync(`git diff --name-only ${fromSHA}`)
-    .stdout.toString()
-    .split('\n');
-}
+  if (CTX.payload.repository) {
+    const repo = CTX.payload.repository;
+    const name = repo.owner.login || repo.owner.name;
 
-function addedLines(filename: string, fromSHA: GitRef): number[] {
-  try {
-    ensureGitHistory();
-    return (
-      execa
-        // unified=0 => no context around changed lines.
-        .commandSync(`git diff --unified=0 ${fromSHA} ${filename}`)
-        .stdout.toString()
-        .split(/(?:\r\n|\r|\n)/g)
-        // compute the lines that have been added. e.g: `[1, 42]`.
-        .reduce((acc: number[], line: string) => {
-          // lines starting with @@ mark a hunk. the format is like this:
-          // @@ -(start of removals),(number of removed lines) +(start of insertions),(number of insertions)
-          // here are some examples:
-          // @@ -33,0 +42,24 @@ => removes nothing and inserts 24 lines starting at line 42
-          // @@ -8 +6 @@        => removes line 8 and adds line 6. if there's no comma it's a single-line change.
-          if (!line.startsWith('@@')) return acc;
+    await Promise.all(
+      commits.map(async commit => {
+        const resp = await API.repos.getCommit({
+          owner: name!,
+          repo: repo.name,
+          ref: commit
+        });
 
-          // get the `+` portion, as only additions are relevant in order to filter annotations for portions that are changed.
-          // afterwards split by `,` (no `,` means a single line addition).
-          const [start, numberOfAddedLines = 1] = line.split(' ')[2].split(',');
-
-          const startInt = parseInt(start, 10);
-          for (let i = 0; i < numberOfAddedLines; i++) {
-            acc.push(startInt + i);
+        resp.data.files.forEach(file => {
+          if (file.status == 'modified' || file.status == 'added') {
+            let entry: GHFile = {
+              name: file.filename,
+              patch: file.patch,
+              sha: commit
+            };
+            files.push(entry);
           }
-          return acc;
-        }, [])
+        });
+      })
     );
-  } catch (e) {
-    core.error(`Failed to diff ${filename}. ${e.stderr}`);
-    return [];
+  } else {
+    core.error('Repo not set');
   }
+
+  return files;
 }
 
-let isHhistoryLoaded = false;
-// make sure we have some history. when using e.g. actions/checkout with its
-// default of `fetch-depth: 1`, we just fetch the commit we're currently looking
-// at. but we want to diff against the base-commit of the PR we're looking at.
-// maybe this could be optimized to fetch exactly that commit.
-function ensureGitHistory() {
-  if (isHhistoryLoaded) return;
-  execa.commandSync('git fetch --unshallow');
-  execa.commandSync(
-    'git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"'
-  );
-  execa.commandSync('git fetch origin');
-  isHhistoryLoaded = true;
+async function getCommits(): Promise<string[]> {
+  let commits: string[] = [];
+
+  switch (CTX.eventName) {
+    case 'pull_request':
+      if (CTX.payload.pull_request && CTX.payload.repository) {
+        const url = CTX.payload.pull_request.commits_url;
+        const repo = CTX.payload.repository;
+
+        const resp = await API.request(`GET ${url}`, {
+          owner: repo.owner.login || repo.owner.name,
+          repo: repo.name
+        });
+
+        resp.data.forEach((commit: {sha: string}) => {
+          commits.push(commit.sha);
+        });
+      } else {
+        core.warning(`Unable to retrieve PR info.`);
+        core.warning(
+          `PR: ${CTX.payload.pull_request}, Repo: ${CTX.payload.repository}`
+        );
+      }
+      break;
+    case 'push':
+      CTX.payload.commits.forEach((commit: {id: string}) => {
+        commits.push(commit.id);
+      });
+      break;
+    default:
+      core.warning(`Unrecognized event: ${CTX.eventName}`);
+  }
+
+  return commits;
 }
 
 export function parsePatch(patch: string): number[] {
-  return patch.split(/(?:\r\n|\r|\n)/g)
-    // compute the lines that have been added. e.g: `[1, 42]`.
-    .reduce((acc: number[], line: string) => {
-      // lines starting with @@ mark a hunk. the format is like this:
-      // @@ -(start of removals),(number of removed lines) +(start of insertions),(number of insertions)
-      // here are some examples:
-      // @@ -33,0 +42,24 @@ => removes nothing and inserts 24 lines starting at line 42
-      // @@ -8 +6 @@        => removes line 8 and adds line 6. if there's no comma it's a single-line change.
-      if (!line.startsWith('@@')) return acc;
+  let lines: number[] = [];
+  let start: number = 0;
 
-      // get the `+` portion, as only additions are relevant in order to filter annotations for portions that are changed.
-      // afterwards split by `,` (no `,` means a single line addition).
-      const [start, numberOfAddedLines = 1] = line.split(' ')[2].split(',');
+  let position: number = 0;
+  patch.split(/(?:\r\n|\r|\n)/g).forEach(line => {
+    if (line.startsWith('@@')) {
+      const added = line.split(' ')[2].split(',')[0];
+      start = parseInt(added, 10);
+    } else if (line.startsWith('+')) {
+      lines.push(start + position);
+    }
+    if (!line.startsWith('-') && !line.startsWith('@@')) {
+      position++;
+    }
+  });
 
-      const startInt = parseInt(start, 10);
-      for (let i = 0; i < numberOfAddedLines; i++) {
-        acc.push(startInt + i);
-      }
-      return acc;
-    }, [])
+  return lines;
 }
-

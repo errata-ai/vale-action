@@ -1,5 +1,4 @@
 import * as github from '@actions/github';
-
 import {parsePatch} from '../src/git';
 
 describe('GitHub API usage', () => {
@@ -16,21 +15,36 @@ describe('GitHub API usage', () => {
       }
     );
 
-    // context.payload.pull_request.commits_url
     const resp2 = await gh.request(`GET ${resp1.data.commits_url}`, {
       owner: 'errata-ai',
       repo: 'vale'
     });
     expect(resp2.data.length).toEqual(1);
 
-    await Promise.all(resp2.data.map(async (commit) => {
-      const resp3 = await gh.repos.getCommit({
-        owner: 'errata-ai',
-        repo: 'vale',
-        ref: commit.sha
-      });
-      expect(resp3.data.files.length).toEqual(1);
-    }));
+    await Promise.all(
+      resp2.data.map(async commit => {
+        const resp3 = await gh.repos.getCommit({
+          owner: 'errata-ai',
+          repo: 'vale',
+          ref: commit.sha
+        });
+        expect(resp3.data.files.length).toEqual(1);
+      })
+    );
+  });
+
+  it('should get modified lines from a commit', async () => {
+    const resp = await gh.repos.getCommit({
+      owner: 'errata-ai',
+      repo: 'vale',
+      // https://github.com/errata-ai/vale/commit/b698b7e3f61a5730adfb6b02281de7f6268d2822
+      ref: 'b698b7e3f61a5730adfb6b02281de7f6268d2822'
+    });
+
+    resp.data.files.forEach(file => {
+      const lines = parsePatch(file.patch);
+      expect(lines).toEqual([12]);
+    });
   });
 
   it('should get modified lines from a commit', async () => {
@@ -44,17 +58,8 @@ describe('GitHub API usage', () => {
     resp.data.files.forEach(file => {
       const lines = parsePatch(file.patch);
       expect(lines).toEqual([
-        329,
-        330,
-        331,
         332,
         333,
-        334,
-        335,
-        336,
-        337,
-        338,
-        339,
         340,
         341,
         342,
@@ -69,10 +74,7 @@ describe('GitHub API usage', () => {
         351,
         352,
         353,
-        354,
-        355,
-        356,
-        357
+        354
       ]);
     });
   });
