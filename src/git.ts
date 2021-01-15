@@ -16,10 +16,7 @@ export function wasLineAddedInPR(file: GHFile, line: number): boolean {
   let lines: number[] = [];
 
   const key = file.name + file.sha;
-  if (!CTX.payload.pull_request) {
-    // TODO: What if we're pushing?
-    return true;
-  } else if (key in cache) {
+  if (key in cache) {
     lines = cache[key] as number[];
   } else {
     lines = parsePatch(file.patch);
