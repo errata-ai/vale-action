@@ -118,8 +118,10 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
 
     let names = new Set<string>();
     payload.forEach(file => {
-      names.add(file.name);
-      modified[file.name] = file;
+      if (fs.existsSync(file.name)) {
+        names.add(file.name);
+        modified[file.name] = file;
+      }
     });
 
     args = args.concat(Array.from(names));
