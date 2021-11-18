@@ -35,7 +35,8 @@ jobs:
         # Optional
         files: path/to/lint
       env:
-        # Required
+        # Required, set by GitHub actions automatically:
+        # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 
