@@ -123,7 +123,12 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
         modified[file.name] = file;
       }
     });
-
+    // add empty file is there is no file to lint
+    // else execa will wait forever as --no-exit flag is given
+    // and there is no argument given
+    if (names.size === 0) {
+      names.add('{}');
+    }
     args = args.concat(Array.from(names));
   } else if (files == 'all') {
     args.push('.');
