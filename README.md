@@ -129,3 +129,34 @@ Due to the current [token permissions](https://help.github.com/en/articles/virtu
 this Action **CAN NOT** post annotations to PRs from forked repositories.
 
 This will likely be fixed by [toolkit/issues/186](https://github.com/actions/toolkit/issues/186).
+
+A workaround is to run this action as a follow-up workflow.
+For example, pull_request workflow generates source artifact and post-workflow scan artifact with vale and then annotate the commit. Use `OVERRIDE_GITHUB_SHA` environment variable to override the commit SHA to annotate if matching a Pull Request.
+
+
+```yaml
+
+on:
+  workflow_run:
+    workflows: ["PR check"]
+    types:
+      - completed
+
+jobs:
+  vale:
+    runs-on: ubuntu-20.04
+    steps:
+      ...
+      - name: Grab pull request sha1
+        run: |
+          ....
+          echo "PR_SHA=$pr_sha" >> $GITHUB_ENV
+      - name: Vale Linter
+        uses: errata-ai/vale-action@v1.4.3
+        with:
+          ...
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          OVERRIDE_GITHUB_SHA: ${{env.PR_SHA}}
+
+```          

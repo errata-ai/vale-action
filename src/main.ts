@@ -26,6 +26,12 @@ export async function run(actionInput: input.Input): Promise<void> {
       sha = github.context.payload.pull_request.head.sha;
     }
 
+    // Allow to customize the SHA to use for the check
+    // useful when using the action with a workflow_run/completed event
+    if (process.env.OVERRIDE_GITHUB_SHA) {
+      sha = process.env.OVERRIDE_GITHUB_SHA;
+    }
+
     runner.makeAnnotations(alertResp.stdout);
     await runner.executeCheck({
       token: actionInput.token,
