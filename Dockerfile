@@ -1,5 +1,5 @@
 # `jdkato/vale` installs Vale to `/bin/vale`.
-FROM jdkato/vale:v2.14.0
+FROM jdkato/vale:v2.10.3
 
 RUN apk add --no-cache --update nodejs nodejs-npm git
 
