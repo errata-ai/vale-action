@@ -69,6 +69,7 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
         try {
           fs.writeFileSync(tmp.name, body);
           logIfDebug(`Successfully fetched remote config.`);
+          args.push('--mode-rev-compat');
           args.push(`--config=${tmp.name}`);
         } catch (e) {
           core.warning(`Failed to write config: ${e}.`);
