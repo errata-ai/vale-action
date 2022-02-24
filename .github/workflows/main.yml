@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@master
 
       - name: Vale
-        uses: errata-ai/vale-action@v1.3.0
+        uses: errata-ai/vale-action@v1
         with:
           styles: |
             https://github.com/errata-ai/Microsoft/releases/latest/download/Microsoft.zip
