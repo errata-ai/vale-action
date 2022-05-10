@@ -17,7 +17,7 @@ const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
 export async function run(actionInput: input.Input): Promise<void> {
   try {
     const startedAt = new Date().toISOString();
-    const localVale = await installLint(actionInput.version);
+    const localVale = await installLint(core.getInput('version'));
     const alertResp = await execa(localVale, actionInput.args);
     core.info(alertResp.stdout);
   } catch (error) {

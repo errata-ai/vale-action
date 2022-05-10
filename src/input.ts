@@ -18,7 +18,6 @@ import {modifiedFiles, GHFile} from './git';
 export interface Input {
   token: string;
   workspace: string;
-  version: string;
   args: string[];
   files: Record<string, GHFile>;
 }
@@ -40,19 +39,6 @@ function logIfDebug(msg: string) {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   let modified: Record<string, GHFile> = {};
-
-  // Get the current version of Vale:
-  let version = '';
-  await exec.exec('vale', ['-v'], {
-    silent: true,
-    listeners: {
-      stdout: (buffer: Buffer) => (version = buffer.toString().trim())
-    }
-  });
-
-  version = version.split(' ').slice(-1)[0];
-  logIfDebug(`Using Vale ${version}`);
-
   let args: string[] = ['--no-exit', '--output=JSON'];
 
   // Figure out what we're supposed to lint:
@@ -101,7 +87,6 @@ export async function get(tok: string, dir: string): Promise<Input> {
     token: tok,
     workspace: dir,
     args: args,
-    version: version,
     files: modified
   };
 }
