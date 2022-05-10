@@ -1,6 +1,7 @@
 # GitHub Actions + Vale
 
-> :octocat: The official GitHub Action for Vale -- install, manage, and run Vale with ease.
+> :octocat: The official GitHub Action for Vale -- install, manage, and run Vale
+> with ease.
 
 <p align="center">
   <img width="50%" alt="A demo screenshot." src="https://user-images.githubusercontent.com/8785025/85236358-272d3680-b3d2-11ea-8793-0f45cb70189a.png">
@@ -8,7 +9,7 @@
 
 ## Usage
 
-Add the following (or similar, but you need the `actions/checkout@master` step) to one of your [`.github/workflows`](https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow) files:
+Add the following (or similar) to one of your [`.github/workflows`][1] files:
 
 ```yaml
 name: reviewdog
@@ -99,3 +100,5 @@ inputs:
     required: false
     default: "added"
 ```
+
+[1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
