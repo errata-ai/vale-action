@@ -38,7 +38,7 @@ function logIfDebug(msg: string) {
 /**
  * Parse our user input and set up our Vale environment.
  */
-export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
+export async function get(tok: string, dir: string): Promise<Input> {
   let modified: Record<string, GHFile> = {};
 
   // Get the current version of Vale:
@@ -49,64 +49,11 @@ export async function get(tmp: any, tok: string, dir: string): Promise<Input> {
       stdout: (buffer: Buffer) => (version = buffer.toString().trim())
     }
   });
+
   version = version.split(' ').slice(-1)[0];
   logIfDebug(`Using Vale ${version}`);
 
   let args: string[] = ['--no-exit', '--output=JSON'];
-  // Check if we were given an external config file.
-  //
-  // NOTE: We need to do this first because we may not have a local config file
-  // to read the `StylesPath` from.
-  const config = core.getInput('config');
-  if (config !== '') {
-    logIfDebug(`Downloading external config '${config}' ...`);
-    await request
-      .get(config)
-      .catch(error => {
-        core.warning(`Failed to fetch remote config: ${error}.`);
-      })
-      .then(body => {
-        try {
-          fs.writeFileSync(tmp.name, body);
-          logIfDebug(`Successfully fetched remote config.`);
-          args.push('--mode-rev-compat');
-          args.push(`--config=${tmp.name}`);
-        } catch (e) {
-          core.warning(`Failed to write config: ${e}.`);
-        }
-      });
-  }
-
-  // Install our user-specified styles:
-  const styles = core.getInput('styles').split('\n');
-  for (const style of styles) {
-    if (style !== '') {
-      const name = style
-        .split('/')
-        .slice(-1)[0]
-        .split('.zip')[0];
-      logIfDebug(`Installing style '${name}' ...`);
-
-      let cmd = ['install', name, style];
-      if (args.length > 2) {
-        cmd = args.concat(cmd);
-      }
-      let stderr = '';
-
-      let resp = await exec.exec('vale', cmd, {
-        cwd: dir,
-        listeners: {
-          stderr: (data: Buffer) => {
-            stderr += data.toString();
-          }
-        }
-      });
-
-      if (resp == 2) {
-        core.setFailed(stderr);
-      }
-    }
-  }
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');

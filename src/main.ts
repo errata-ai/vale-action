@@ -1,9 +1,9 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as tmp from 'tmp';
 
 import {CheckRunner} from './check';
 import * as input from './input';
+import {installLint} from './install';
 
 import execa from 'execa';
 
@@ -17,33 +17,15 @@ const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
 export async function run(actionInput: input.Input): Promise<void> {
   try {
     const startedAt = new Date().toISOString();
-    const alertResp = await execa('vale', actionInput.args);
-
-    let runner = new CheckRunner(actionInput.files);
-
-    let sha = github.context.sha;
-    if (github.context.payload.pull_request) {
-      sha = github.context.payload.pull_request.head.sha;
-    }
-
-    // Allow to customize the SHA to use for the check
-    // useful when using the action with a workflow_run/completed event
-    if (process.env.OVERRIDE_GITHUB_SHA) {
-      sha = process.env.OVERRIDE_GITHUB_SHA;
-    }
-
-    runner.makeAnnotations(alertResp.stdout);
-    await runner.executeCheck({
-      token: actionInput.token,
-      name: 'Vale',
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      head_sha: sha,
-      started_at: startedAt,
-      context: {vale: actionInput.version}
-    });
+    const localVale = await installLint(actionInput.version);
+    const alertResp = await execa(localVale, actionInput.args);
+    core.info(alertResp.stdout);
   } catch (error) {
-    core.setFailed(error.stderr);
+    if (typeof error === 'string') {
+      core.setFailed(error.toUpperCase());
+    } else if (error instanceof Error) {
+      core.setFailed(error.message);
+    }
   }
 }
 
@@ -52,14 +34,14 @@ async function main(): Promise<void> {
     const userToken = GITHUB_TOKEN as string;
     const workspace = GITHUB_WORKSPACE as string;
 
-    const tmpobj = tmp.fileSync({postfix: '.ini', dir: workspace});
-    const actionInput = await input.get(tmpobj, userToken, workspace);
-
+    const actionInput = await input.get(userToken, workspace);
     await run(actionInput);
-
-    tmpobj.removeCallback();
   } catch (error) {
-    core.setFailed(error.message);
+    if (typeof error === 'string') {
+      core.setFailed(error.toUpperCase());
+    } else if (error instanceof Error) {
+      core.setFailed(error.message);
+    }
   }
 }
 

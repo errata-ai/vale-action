@@ -6,13 +6,10 @@ branding:
   color: green
 
 inputs:
-  styles:
-    description: A list of styles to install prior to running Vale.
+  version:
+    description: 'The Vale CLI version to install.'
     required: false
-
-  config:
-    description: An externally-hosted configuration file to use.
-    required: false
+    default: 'latest'
 
   files:
     description: 'The files to lint: "all" or "<some_folder>".'
@@ -33,8 +30,7 @@ runs:
   using: docker
   image: Dockerfile
   args:
-    - ${{ inputs.styles }}
-    - ${{ inputs.config }}
+    - ${{ inputs.version }}
     - ${{ inputs.files }}
     - ${{ inputs.onlyAnnotateModifiedLines }}
     - ${{ inputs.debug }}
