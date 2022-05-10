@@ -19,15 +19,15 @@ jobs:
     name: runner / vale
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: errata-ai/vale-action@reviewdog
-      with:
-        # Optional
-        files: path/to/lint
-      env:
-        # Required, set by GitHub actions automatically:
-        # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - uses: actions/checkout@v2
+      - uses: errata-ai/vale-action@reviewdog
+        with:
+          # Optional
+          files: path/to/lint
+        env:
+          # Required, set by GitHub actions automatically:
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 
 ## Repository Structure
