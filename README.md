@@ -8,7 +8,7 @@
 
 ## Usage
 
-Add the the following (or similar, but you need the `actions/checkout@master` step) to one of your [`.github/workflows`](https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow) files:
+Add the following (or similar, but you need the `actions/checkout@master` step) to one of your [`.github/workflows`](https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow) files:
 
 ```yaml
 name: Linting
