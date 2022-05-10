@@ -1,3 +1,0 @@
-Joblint
-octocat
-repo

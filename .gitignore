@@ -1,2 +1,5 @@
 node_modules
 tsconfig.tsbuildinfo
+
+.github/styles/*
+!.github/styles/Vocab/Action

@@ -7,24 +7,43 @@ branding:
 
 inputs:
   version:
-    description: 'The Vale CLI version to install.'
+    description: "The Vale CLI version to install."
     required: false
-    default: 'latest'
+    default: "latest"
 
   files:
     description: 'The files to lint: "all" or "<some_folder>".'
     required: false
     default: all
 
-  onlyAnnotateModifiedLines:
-    description: Only post annotations on lines that have changed within a PR.
-    required: false
-    default: 'false'
-
   debug:
-    description: 'Log debugging information to stdout'
+    description: "Log debugging information to stdout"
     required: false
-    default: 'false'
+    default: "false"
+
+  reporter:
+    description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]."
+    required: false
+    default: "github-pr-check"
+
+  fail_on_error:
+    description: |
+      Exit code for reviewdog when errors are found [true,false]
+      Default is `false`.
+    required: false
+    default: "false"
+
+  level:
+    description: "Report level for reviewdog [info,warning,error]"
+    required: false
+    default: "error"
+
+  filter_mode:
+    description: |
+      Filtering for the reviewdog command [added,diff_context,file,nofilter].
+      Default is added.
+    required: false
+    default: "added"
 
 runs:
   using: docker

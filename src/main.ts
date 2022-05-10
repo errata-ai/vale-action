@@ -1,11 +1,10 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
-
-import {CheckRunner} from './check';
-import * as input from './input';
-import {installLint} from './install';
+import * as exec from '@actions/exec';
 
 import execa from 'execa';
+import * as path from 'path';
+
+import * as input from './input';
 
 /**
  * These environment variables are exposed for GitHub Actions.
@@ -15,11 +14,41 @@ import execa from 'execa';
 const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
 
 export async function run(actionInput: input.Input): Promise<void> {
+  const workdir = core.getInput('workdir') || '.';
+  const cwd = path.relative(
+    process.env['GITHUB_WORKSPACE'] || process.cwd(),
+    workdir
+  );
+
   try {
-    const startedAt = new Date().toISOString();
-    const localVale = await installLint(core.getInput('version'));
-    const alertResp = await execa(localVale, actionInput.args);
-    core.info(alertResp.stdout);
+    // Vale output ...
+    const alertResp = await execa(actionInput.exePath, actionInput.args, {
+      cwd: cwd
+    });
+
+    if (core.getInput('debug') == 'true') {
+        core.info(alertResp.stdout);
+        core.info(alertResp.stderr);
+    }
+
+    // Pipe to reviewdog ...
+    process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
+    await exec.exec(
+      '/bin/reviewdog',
+      [
+        '-f=rdjsonl',
+        `-name=vale`,
+        `-reporter=${core.getInput('reporter')}`,
+        `-fail-on-error=${core.getInput('fail_on_error')}`,
+        `-filter-mode=${core.getInput('filter_mode')}`,
+        `-level=${core.getInput('level')}`
+      ],
+      {
+        cwd,
+        input: Buffer.from(alertResp.stdout, 'utf-8'),
+        ignoreReturnCode: true
+      }
+    );
   } catch (error) {
     if (typeof error === 'string') {
       core.setFailed(error.toUpperCase());

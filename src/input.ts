@@ -3,8 +3,8 @@ import * as exec from '@actions/exec';
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as request from 'request-promise-native';
-import {modifiedFiles, GHFile} from './git';
+
+import {installLint} from './install';
 
 /**
  * Our expected input.
@@ -18,8 +18,8 @@ import {modifiedFiles, GHFile} from './git';
 export interface Input {
   token: string;
   workspace: string;
+  exePath: string;
   args: string[];
-  files: Record<string, GHFile>;
 }
 
 /**
@@ -38,32 +38,40 @@ function logIfDebug(msg: string) {
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tok: string, dir: string): Promise<Input> {
-  let modified: Record<string, GHFile> = {};
-  let args: string[] = ['--no-exit', '--output=JSON'];
+  const localVale = await installLint(core.getInput('version'));
+
+  let version = '';
+  await exec.exec(localVale, ['-v'], {
+    silent: true,
+    listeners: {
+      stdout: (buffer: Buffer) => (version = buffer.toString().trim())
+    }
+  });
+  version = version.split(' ').slice(-1)[0];
+  logIfDebug(`Using Vale ${version}`);
+
+  let stderr = '';
+  let resp = await exec.exec(localVale, ['sync'], {
+    cwd: dir,
+    listeners: {
+      stderr: (data: Buffer) => {
+        stderr += data.toString();
+      }
+    }
+  });
+
+  if (resp !== 0) {
+    core.setFailed(stderr);
+  }
+
+  let args: string[] = [
+    '--no-exit',
+    `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`
+  ];
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
-  if (
-    core.getInput('onlyAnnotateModifiedLines') != 'false' ||
-    files == '__onlyModified'
-  ) {
-    let payload = await modifiedFiles();
-
-    let names = new Set<string>();
-    payload.forEach(file => {
-      if (fs.existsSync(file.name)) {
-        names.add(file.name);
-        modified[file.name] = file;
-      }
-    });
-    // add empty file is there is no file to lint
-    // else execa will wait forever as --no-exit flag is given
-    // and there is no argument given
-    if (names.size === 0) {
-      names.add('{}');
-    }
-    args = args.concat(Array.from(names));
-  } else if (files == 'all') {
+  if (files == 'all') {
     args.push('.');
   } else if (fs.existsSync(path.resolve(dir, files))) {
     args.push(files);
@@ -86,7 +94,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   return {
     token: tok,
     workspace: dir,
-    args: args,
-    files: modified
+    exePath: localVale,
+    args: args
   };
 }
