@@ -50,11 +50,7 @@ export async function run(actionInput: input.Input): Promise<void> {
       }
     );
   } catch (error) {
-    if (typeof error === 'string') {
-      core.setFailed(error.toUpperCase());
-    } else if (error instanceof Error) {
-      core.setFailed(error.message);
-    }
+    core.setFailed(error.stderr);
   }
 }
 
@@ -66,11 +62,7 @@ async function main(): Promise<void> {
     const actionInput = await input.get(userToken, workspace);
     await run(actionInput);
   } catch (error) {
-    if (typeof error === 'string') {
-      core.setFailed(error.toUpperCase());
-    } else if (error instanceof Error) {
-      core.setFailed(error.message);
-    }
+    core.setFailed(error.message);
   }
 }
 
