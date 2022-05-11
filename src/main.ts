@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
-import execa from 'execa';
 import * as path from 'path';
 
 import * as input from './input';
@@ -21,36 +20,49 @@ export async function run(actionInput: input.Input): Promise<void> {
   );
 
   try {
-    // Vale output ...
-    const alertResp = await execa(actionInput.exePath, actionInput.args, {
-      cwd: cwd
-    });
+    const code = await core.group(
+      'Running vale with reviewdog 🐶 ...',
+      async (): Promise<number> => {
+        // Vale output ...
+        const output = await exec.getExecOutput(
+          actionInput.exePath,
+          actionInput.args,
+          {
+            cwd,
+            ignoreReturnCode: true
+          }
+        );
 
-    if (core.getInput('debug') == 'true') {
-        core.info(alertResp.stdout);
-        core.info(alertResp.stderr);
-    }
-
-    // Pipe to reviewdog ...
-    process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
-    await exec.exec(
-      '/bin/reviewdog',
-      [
-        '-f=rdjsonl',
-        `-name=vale`,
-        `-reporter=${core.getInput('reporter')}`,
-        `-fail-on-error=${core.getInput('fail_on_error')}`,
-        `-filter-mode=${core.getInput('filter_mode')}`,
-        `-level=${core.getInput('level')}`
-      ],
-      {
-        cwd,
-        input: Buffer.from(alertResp.stdout, 'utf-8'),
-        ignoreReturnCode: true
+        // Pipe to reviewdog ...
+        process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
+        return await exec.exec(
+          '/bin/reviewdog',
+          [
+            '-f=rdjsonl',
+            `-name=vale`,
+            `-reporter=${core.getInput('reporter')}`,
+            `-fail-on-error=${core.getInput('fail_on_error')}`,
+            `-filter-mode=${core.getInput('filter_mode')}`,
+            `-level=${core.getInput('level')}`
+          ],
+          {
+            cwd,
+            input: Buffer.from(output.stdout, 'utf-8'),
+            ignoreReturnCode: true
+          }
+        );
       }
     );
+
+    if (code !== 0) {
+      core.setFailed(`reviewdog exited with status code: ${code}`);
+    }
   } catch (error) {
-    core.setFailed(error.stderr);
+    if (error instanceof Error) {
+      core.setFailed(error);
+    } else {
+      core.setFailed(`${error}`);
+    }
   }
 }
 
@@ -62,7 +74,11 @@ async function main(): Promise<void> {
     const actionInput = await input.get(userToken, workspace);
     await run(actionInput);
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.setFailed(error);
+    } else {
+      core.setFailed(`${error}`);
+    }
   }
 }
 
