@@ -69,7 +69,7 @@ inputs:
     default: all
 
   debug:
-    description: "Log debugging information to stdout"
+    description: "Log debugging information to stdout."
     required: false
     default: "false"
 
@@ -86,7 +86,7 @@ inputs:
     default: "false"
 
   level:
-    description: "Report level for reviewdog [info,warning,error]"
+    description: "Report level for reviewdog [info,warning,error]."
     required: false
     default: "error"
 
@@ -96,6 +96,11 @@ inputs:
       Default is added.
     required: false
     default: "added"
+
+  vale_flags:
+    description: "Space-delimited list of flags for the Vale CLI."
+    required: false
+    default: ""
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
