@@ -6,6 +6,16 @@ import * as path from 'path';
 
 import {installLint} from './install';
 
+export function parse(flags: string): string[] {
+    flags = flags.trim();
+    if (flags === "") {
+      return [];
+    }
+
+    // TODO: need to simulate bash?
+    return flags.split(/\s+/);
+  }
+
 /**
  * Our expected input.
  *
@@ -39,6 +49,7 @@ function logIfDebug(msg: string) {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
+  const valeFlags = core.getInput("vale_flags");
 
   let version = '';
   await exec.exec(localVale, ['-v'], {
@@ -65,8 +76,8 @@ export async function get(tok: string, dir: string): Promise<Input> {
   }
 
   let args: string[] = [
-    '--no-exit',
-    `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`
+    `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`,
+    ...parse(valeFlags),
   ];
 
   // Figure out what we're supposed to lint:

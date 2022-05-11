@@ -45,6 +45,11 @@ inputs:
     required: false
     default: "added"
 
+  vale_flags:
+    description: "Flags for the Vale CLI"
+    required: false
+    default: ""
+
 runs:
   using: docker
   image: Dockerfile
