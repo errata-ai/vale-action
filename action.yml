@@ -56,5 +56,9 @@ runs:
   args:
     - ${{ inputs.version }}
     - ${{ inputs.files }}
-    - ${{ inputs.onlyAnnotateModifiedLines }}
     - ${{ inputs.debug }}
+    - ${{ inputs.reporter }}
+    - ${{ inputs.fail_on_error }}
+    - ${{ inputs.level }}
+    - ${{ inputs.filter_mode }}
+    - ${{ inputs.vale_flags }}
