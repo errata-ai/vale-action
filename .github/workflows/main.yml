@@ -10,7 +10,7 @@ jobs:
       - uses: ./ # Uses an action in the root directory
         with:
           reporter: github-check
-          fail_on_error: false
+          fail_on_error: true
           level: warning
           debug: true
         env:
