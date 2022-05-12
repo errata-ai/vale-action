@@ -8,9 +8,13 @@
 
 {{- range .Alerts -}}
 
-{{- $error := .Severity -}}
-{{- if eq .Severity "suggestion" -}}
-    {{- $error = "info" -}}
+{{- $error := "" -}}
+{{- if eq .Severity "error" -}}
+    {{- $error = "ERROR" -}}
+{{- else if eq .Severity "warning" -}}
+    {{- $error = "WARNING" -}}
+{{- else -}}
+    {{- $error = "INFO" -}}
 {{- end}}
 
 {{- /* Variables setup */ -}}

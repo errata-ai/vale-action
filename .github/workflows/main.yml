@@ -1,14 +1,13 @@
-name: CI
+name: reviewdog
 on: push
 
 jobs:
-  lint:
+  vale:
+    name: runner / vale
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Vale
-        uses: ./ # Uses an action in the root directory
+      - uses: actions/checkout@v2
+      - uses: ./ # Uses an action in the root directory
         with:
           reporter: github-check
           debug: true
