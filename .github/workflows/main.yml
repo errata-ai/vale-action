@@ -11,6 +11,7 @@ jobs:
         with:
           reporter: github-check
           fail_on_error: false
+          level: warning
           debug: true
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
