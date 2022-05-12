@@ -76,7 +76,7 @@ inputs:
   reporter:
     description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]."
     required: false
-    default: "github-pr-check"
+    default: "github-check"
 
   fail_on_error:
     description: |
