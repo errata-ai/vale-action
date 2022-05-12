@@ -58,6 +58,8 @@ You can further customize the linting processing by providing one of the followi
 
 ### `version` (default: latest)
 
+> NOTE: The provided version must be `>= 2.16.0`.
+
 Specify the Vale CLI version to use.
 
 ```yaml
