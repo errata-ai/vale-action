@@ -6,10 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Vale
         uses: ./ # Uses an action in the root directory
         with:
+          reporter: github-check
           debug: true
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
