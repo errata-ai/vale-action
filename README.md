@@ -56,51 +56,80 @@ BasedOnStyles = Vale
 
 You can further customize the linting processing by providing one of the following optional inputs.
 
+### `version` (default: latest)
+
+Specify the Vale CLI version to use.
+
 ```yaml
-inputs:
-  version:
-    description: "The Vale CLI version to install."
-    required: false
-    default: "latest"
+with:
+  version: 2.17.0
+```
 
-  files:
-    description: 'The files to lint: "all" or "<some_folder>".'
-    required: false
-    default: all
+### `files` (default: all)
 
-  debug:
-    description: "Log debugging information to stdout."
-    required: false
-    default: "false"
+`files` specifies where Vale will look for files to lint.
 
-  reporter:
-    description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]."
-    required: false
-    default: "github-check"
+```yaml
+with:
+  files: path/to/lint
+```
 
-  fail_on_error:
-    description: |
-      Exit code for reviewdog when errors are found [true,false]
-      Default is `false`.
-    required: false
-    default: "false"
+You can supply this value one of three ways:
 
-  level:
-    description: "Report level for reviewdog [info,warning,error]."
-    required: false
-    default: "error"
+- `files: all` (default): The repo's root directory; equivalent to calling `vale .`.
 
-  filter_mode:
-    description: |
-      Filtering for the reviewdog command [added,diff_context,file,nofilter].
-      Default is added.
-    required: false
-    default: "added"
+- `files: path/to/lint`: A single file or directory; equivalent to calling `vale path/to/lint`.
 
-  vale_flags:
-    description: "Space-delimited list of flags for the Vale CLI."
-    required: false
-    default: ""
+- `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
+
+### `reporter` (default: github-check)
+
+Set the [reporter](https://github.com/reviewdog/reviewdog#reporters) type.
+
+```yaml
+with:
+  # github-pr-check, github-pr-review, github-check
+  reporter: github-pr-check
+```
+
+### `fail_on_error` (default: false)
+
+By default, `reviewdog` will return exit code `0` even if it finds errors. If `fail_on_error` is enabled, `reviewdog` exits with `1` when at least one error
+was reported.
+
+```yaml
+with:
+  fail_on_error: true
+```
+
+### `level` (default: error)
+
+Set the [report level](https://github.com/reviewdog/reviewdog#reporter-github-checks--reportergithub-pr-check) for GitHub annotations.
+
+```yaml
+with:
+  # info, warning, error
+  level: warning
+```
+
+### `filter_mode` (default: added)
+
+Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
+`reviewdog`.
+
+```yaml
+with:
+  # added, diff_context, file, nofilter
+  level: nofilter
+```
+
+### `vale_flags` (default: "")
+
+Space-delimited list of flags for the Vale CLI.
+
+```yaml
+with:
+  vale_flags: "--glob='*.txt'"
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow

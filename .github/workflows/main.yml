@@ -10,6 +10,7 @@ jobs:
       - uses: ./ # Uses an action in the root directory
         with:
           reporter: github-check
+          fail_on_error: true
           debug: true
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
