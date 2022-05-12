@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      - name: Vale
+      - name: Vale (v1)
         uses: errata-ai/vale-action@v1
         with:
           styles: |
