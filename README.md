@@ -42,7 +42,7 @@ The recommended repository structure makes use of the existing `.github` directo
 ...
 ```
 
-Where `styles` represents your [`StylesPath`](https://errata-ai.github.io/vale/styles/). The top-level `.vale.ini` file should reference this directory:
+Where `styles` represents your [`StylesPath`](https://docs.errata.ai/vale/styles). The top-level `.vale.ini` file should reference this directory:
 
 ```ini
 StylesPath = .github/styles
@@ -126,7 +126,7 @@ Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
 ```yaml
 with:
   # added, diff_context, file, nofilter
-  level: nofilter
+  filter_mode: nofilter
 ```
 
 ### `vale_flags` (default: "")
