@@ -32,6 +32,7 @@ export async function run(actionInput: input.Input): Promise<void> {
             ignoreReturnCode: true
           }
         );
+        const code = output.exitCode;
 
         // Pipe to reviewdog ...
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
@@ -43,7 +44,7 @@ export async function run(actionInput: input.Input): Promise<void> {
             `-reporter=${core.getInput('reporter')}`,
             `-fail-on-error=${core.getInput('fail_on_error')}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${core.getInput('level')}`
+            `-level=${(code == 1 ? 'error' : 'info')}`
           ],
           {
             cwd,
