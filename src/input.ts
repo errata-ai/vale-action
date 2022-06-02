@@ -62,7 +62,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   logIfDebug(`Using Vale ${version}`);
 
   let stderr = '';
-  let resp = await exec.exec(localVale, ['sync'], {
+  let resp = await exec.exec(localVale, [...parse(valeFlags), 'sync'], {
     cwd: dir,
     listeners: {
       stderr: (data: Buffer) => {
