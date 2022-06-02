@@ -44,7 +44,7 @@ export async function run(actionInput: input.Input): Promise<void> {
             `-reporter=${core.getInput('reporter')}`,
             `-fail-on-error=${core.getInput('fail_on_error')}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${(code == 1 ? 'error' : 'info')}`
+            `-level=${code == 1 ? 'error' : 'info'}`
           ],
           {
             cwd,
