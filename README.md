@@ -104,20 +104,6 @@ with:
   fail_on_error: true
 ```
 
-### `level` (default: error)
-
-Set the [report level](https://github.com/reviewdog/reviewdog#reporter-github-checks--reportergithub-pr-check) for GitHub
-annotations.
-
-`info` and `warning` will result in a `neutral` GitHub Status, while `error`
-results in `failure`.
-
-```yaml
-with:
-  # info, warning, error
-  level: warning
-```
-
 ### `filter_mode` (default: added)
 
 Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
