@@ -84,7 +84,7 @@ You can supply this value one of three ways:
 
 - `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
 
-### `reporter` (default: github-check)
+### `reporter` (default: github-pr-check)
 
 Set the [reporter](https://github.com/reviewdog/reviewdog#reporters) type.
 
