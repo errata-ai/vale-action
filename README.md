@@ -117,7 +117,7 @@ with:
 
 ### `vale_flags` (default: "")
 
-Space-delimited list of flags for the Vale CLI.
+Space-delimited list of flags for the Vale CLI. To see a full list of available flags, run `vale -h`.
 
 ```yaml
 with:
