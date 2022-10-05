@@ -41,7 +41,7 @@
     "@types/jest": "^24.0.13",
     "@types/node": "^14.0.13",
     "@zeit/ncc": "^0.22.3",
-    "jest": "^24.8.0",
+    "jest": "^29.1.2",
     "jest-circus": "^24.7.1",
     "prettier": "^1.17.1",
     "ts-jest": "^24.0.2",
