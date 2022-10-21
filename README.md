@@ -121,7 +121,7 @@ Space-delimited list of flags for the Vale CLI. To see a full list of available 
 
 ```yaml
 with:
-  vale_flags: "--glob='*.txt'"
+  vale_flags: "--glob=*.txt"
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
