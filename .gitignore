@@ -3,3 +3,5 @@ tsconfig.tsbuildinfo
 
 .github/styles/*
 !.github/styles/Vocab/
+
+.idea
