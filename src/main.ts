@@ -32,7 +32,9 @@ export async function run(actionInput: input.Input): Promise<void> {
             ignoreReturnCode: true
           }
         );
-        const code = output.exitCode;
+
+        const vale_code = output.exitCode;
+        const should_fail = core.getInput('fail_on_error');
 
         // Pipe to reviewdog ...
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
@@ -42,9 +44,9 @@ export async function run(actionInput: input.Input): Promise<void> {
             '-f=rdjsonl',
             `-name=vale`,
             `-reporter=${core.getInput('reporter')}`,
-            `-fail-on-error=${core.getInput('fail_on_error')}`,
+            `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${code == 1 ? 'error' : 'info'}`
+            `-level=${vale_code == 1 && should_fail ? 'error' : 'info'}`
           ],
           {
             cwd,
