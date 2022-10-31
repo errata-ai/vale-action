@@ -84,7 +84,7 @@ You can supply this value one of three ways:
 
 - `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
 
-### `reporter` (default: github-check)
+### `reporter` (default: github-pr-check)
 
 Set the [reporter](https://github.com/reviewdog/reviewdog#reporters) type.
 
@@ -117,11 +117,11 @@ with:
 
 ### `vale_flags` (default: "")
 
-Space-delimited list of flags for the Vale CLI.
+Space-delimited list of flags for the Vale CLI. To see a full list of available flags, run `vale -h`.
 
 ```yaml
 with:
-  vale_flags: "--glob='*.txt'"
+  vale_flags: "--glob=*.txt"
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
