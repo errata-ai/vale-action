@@ -94,6 +94,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
       args = args.concat(JSON.parse(files));
     } catch (e) {
       core.info(e)
+      core.info(typeof files)
       core.warning(
         `User-specified path (${files}) is invalid; falling back to 'all'.`
       );
