@@ -50,6 +50,11 @@ inputs:
     required: false
     default: ""
 
+  separator:
+    description: "Split character for input strings."
+    required: false
+    default: ""
+
 runs:
   using: docker
   image: Dockerfile
@@ -62,3 +67,4 @@ runs:
     - ${{ inputs.level }}
     - ${{ inputs.filter_mode }}
     - ${{ inputs.vale_flags }}
+    - ${{ inputs.separator }}

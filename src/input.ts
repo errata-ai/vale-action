@@ -82,10 +82,14 @@ export async function get(tok: string, dir: string): Promise<Input> {
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
+  const delim = core.getInput('separator');
+
   if (files == 'all') {
     args.push('.');
   } else if (fs.existsSync(path.resolve(dir, files))) {
     args.push(files);
+  } else if (delim !== "") {
+    args = args.concat(files.split(delim));
   } else {
     try {
       // Support for an array of inputs.
