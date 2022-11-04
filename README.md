@@ -76,13 +76,20 @@ with:
   files: path/to/lint
 ```
 
-You can supply this value one of three ways:
+You can supply this value one of four ways:
 
 - `files: all` (default): The repo's root directory; equivalent to calling `vale .`.
 
 - `files: path/to/lint`: A single file or directory; equivalent to calling `vale path/to/lint`.
 
-- `files: '["input1", "input2"]'`: A list of file or directory arguments; equivalent to calling `vale input1 input2`.
+- `files: '["input1", "input2"]'`: A JSON-formatted list of file or directory arguments; equivalent to calling `vale input1 input2`.
+
+- `files: 'input1,input2'`: A character-delimited list of files. The character is determined by the input value `separator`:
+    
+    ```
+    with:
+      separator: ","
+    ```
 
 ### `reporter` (default: github-pr-check)
 
@@ -102,17 +109,6 @@ was reported.
 ```yaml
 with:
   fail_on_error: true
-```
-
-### `filter_mode` (default: added)
-
-Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
-`reviewdog`.
-
-```yaml
-with:
-  # added, diff_context, file, nofilter
-  filter_mode: nofilter
 ```
 
 ### `vale_flags` (default: "")
