@@ -91,10 +91,8 @@ export async function get(tok: string, dir: string): Promise<Input> {
       // Support for an array of inputs.
       //
       // e.g., '[".github/workflows/main.yml"]'
-      args = args.concat(JSON.parse(files));
+      args = args.concat(JSON.parse(JSON.stringify(files)));
     } catch (e) {
-      core.info(e)
-      core.info(typeof files)
       core.warning(
         `User-specified path (${files}) is invalid; falling back to 'all'.`
       );
