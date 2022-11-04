@@ -86,7 +86,7 @@ You can supply this value one of four ways:
 
 - `files: 'input1,input2'`: A character-delimited list of files. The character is determined by the input value `separator`:
     
-    ```
+    ```yaml
     with:
       separator: ","
     ```
