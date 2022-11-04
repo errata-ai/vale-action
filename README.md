@@ -111,6 +111,17 @@ with:
   fail_on_error: true
 ```
 
+### `filter_mode` (default: added)
+
+Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
+`reviewdog`.
+
+```yaml
+with:
+  # added, diff_context, file, nofilter
+  filter_mode: nofilter
+```
+
 ### `vale_flags` (default: "")
 
 Space-delimited list of flags for the Vale CLI. To see a full list of available flags, run `vale -h`.
