@@ -43,7 +43,7 @@ inputs:
       Filtering for the reviewdog command [added,diff_context,file,nofilter].
       Default is added.
     required: false
-    default: "nofilter"
+    default: "added"
 
   vale_flags:
     description: "Space-delimited list of flags for the Vale CLI."
