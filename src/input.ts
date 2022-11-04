@@ -104,7 +104,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     }
   }
 
-  logIfDebug(`Vale set-up comeplete; using '${args}'.`);
+  logIfDebug(`Vale set-up complete; using '${args}'.`);
 
   return {
     token: tok,
