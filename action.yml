@@ -58,3 +58,5 @@ inputs:
 runs:
   using: node16
   main: lib/main.js
+  # pre: 'cleanup.js'
+  # pre-if: runner.os == 'linux'
