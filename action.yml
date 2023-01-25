@@ -50,11 +50,6 @@ inputs:
     required: false
     default: ""
 
-  separator:
-    description: "Split character for input strings."
-    required: false
-    default: ""
-
 runs:
   using: node16
   main: lib/main.js
