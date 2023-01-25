@@ -56,15 +56,5 @@ inputs:
     default: ""
 
 runs:
-  using: docker
-  image: Dockerfile
-  args:
-    - ${{ inputs.version }}
-    - ${{ inputs.files }}
-    - ${{ inputs.debug }}
-    - ${{ inputs.reporter }}
-    - ${{ inputs.fail_on_error }}
-    - ${{ inputs.level }}
-    - ${{ inputs.filter_mode }}
-    - ${{ inputs.vale_flags }}
-    - ${{ inputs.separator }}
+  using: node16
+  main: lib/main.js
