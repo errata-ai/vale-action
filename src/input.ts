@@ -4,7 +4,9 @@ import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import {installLint} from './install';
+import {installLint, installTool} from './install';
+
+const rd = 'https://github.com/reviewdog/reviewdog/releases/download/v0.14.1/reviewdog_0.14.1_Linux_x86_64.tar.gz';
 
 export function parse(flags: string): string[] {
     flags = flags.trim();
@@ -29,6 +31,7 @@ export interface Input {
   token: string;
   workspace: string;
   exePath: string;
+  reviewdog: string;
   args: string[];
 }
 
@@ -49,6 +52,7 @@ function logIfDebug(msg: string) {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
+  const reviewdog = await installTool('reviewdog', rd);
   const valeFlags = core.getInput("vale_flags");
 
   let version = '';
@@ -110,6 +114,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     token: tok,
     workspace: dir,
     exePath: localVale,
+    reviewdog: reviewdog,
     args: args
   };
 }

@@ -39,7 +39,7 @@ export async function run(actionInput: input.Input): Promise<void> {
         // Pipe to reviewdog ...
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
         return await exec.exec(
-          '/bin/reviewdog',
+          actionInput.reviewdog,
           [
             '-f=rdjsonl',
             `-name=vale`,
