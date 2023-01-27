@@ -89,7 +89,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     core.setFailed(stderr);
   }
 
-  let args: string[] = [`--output=JSON`, ...parsedFlags];
+  let args: string[] = [`--no-exit`, `--output=JSON`, ...parsedFlags];
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
