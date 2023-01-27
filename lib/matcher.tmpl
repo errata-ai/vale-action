@@ -8,15 +8,19 @@
 
 {{- range .Alerts -}}
 
+{{- $error := .Severity -}}
+{{- if eq .Severity "suggestion" -}}
+    {{- $error = "notice" -}}
+{{- end}}
+
 {{- /* Variables setup */ -}}
 
 {{- $line := printf "%d" .Line -}}
 {{- $col := printf "%d" (index .Span 0) -}}
 {{- $check := printf "%s" .Check -}}
 {{- $message := printf "%s" .Message -}}
-{{- $level := printf "%s" .Severity -}}
 
 {{- /* Output */ -}}
-{{ $path }}:{{ $line }}:{{ $col }}:{{ $level }}:{{ $check }}:{{ $message }}
+{{ $path }}:{{ $line }}:{{ $col }}:{{ $error }}:{{ $check }}:{{ $message }}
 {{end -}}
 {{end -}}
