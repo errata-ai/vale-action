@@ -92,17 +92,21 @@ async function getCommits(): Promise<string[]> {
       break;
     default:
       if (process.env.OVERRIDE_PR_NUMBER) {
-        const resp = await API.request('GET /repos/{owner}/{repo}/pulls/{pull_number}/commits', {
-          owner: CTX.repo.owner,
-          repo: CTX.repo.repo,
-          pull_number: process.env.OVERRIDE_PR_NUMBER
-        })
+        const resp = await API.request(
+          'GET /repos/{owner}/{repo}/pulls/{pull_number}/commits',
+          {
+            owner: CTX.repo.owner,
+            repo: CTX.repo.repo,
+            pull_number: process.env.OVERRIDE_PR_NUMBER
+          }
+        );
 
-        resp.data.forEach((commit: { sha: string }) => {
+        resp.data.forEach((commit: {sha: string}) => {
           commits.push(commit.sha);
         });
+      } else {
+        core.warning(`Unrecognized event: ${CTX.eventName}`);
       }
-      else { core.warning(`Unrecognized event: ${CTX.eventName}`); }
   }
 
   return commits;

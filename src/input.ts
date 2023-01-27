@@ -6,17 +6,18 @@ import path from 'path';
 
 import {installLint, installTool} from './install';
 
-const rd = 'https://github.com/reviewdog/reviewdog/releases/download/v0.14.1/reviewdog_0.14.1_Linux_x86_64.tar.gz';
+const rd =
+  'https://github.com/reviewdog/reviewdog/releases/download/v0.14.1/reviewdog_0.14.1_Linux_x86_64.tar.gz';
 
 export function parse(flags: string): string[] {
-    flags = flags.trim();
-    if (flags === "") {
-      return [];
-    }
-
-    // TODO: need to simulate bash?
-    return flags.split(/\s+/);
+  flags = flags.trim();
+  if (flags === '') {
+    return [];
   }
+
+  // TODO: need to simulate bash?
+  return flags.split(/\s+/);
+}
 
 /**
  * Our expected input.
@@ -53,7 +54,7 @@ function logIfDebug(msg: string) {
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
   //const reviewdog = await installTool('reviewdog', rd);
-  const valeFlags = core.getInput("vale_flags");
+  const valeFlags = core.getInput('vale_flags');
 
   let version = '';
   await exec.exec(localVale, ['-v'], {
@@ -70,13 +71,13 @@ export async function get(tok: string, dir: string): Promise<Input> {
     valeFlags
       .trim()
       .split(/\s+/)
-      .map((arg) => arg.split(`=`)[0])
-      .filter((arg) => arg.startsWith(`-`))
-      .map((arg) => arg.replace(/^-+/, ``))
-  )
+      .map(arg => arg.split(`=`)[0])
+      .filter(arg => arg.startsWith(`-`))
+      .map(arg => arg.replace(/^-+/, ``))
+  );
 
   if (userArgNames.has(`output`)) {
-    throw new Error(`please, don't change the --output style.`)
+    throw new Error(`please, don't change the --output style.`);
   }
 
   let stderr = '';
@@ -96,7 +97,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   let args: string[] = [
     //`--output=${path.resolve(__dirname, 'matcher.tmpl')}`,
     `--output=JSON`,
-    ...parsedFlags,
+    ...parsedFlags
   ];
 
   // Figure out what we're supposed to lint:
