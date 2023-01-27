@@ -53,13 +53,11 @@ export async function annotate(output: string) {
     ])
     .addLink('View staging deployment!', 'https://github.com')
     .addCodeBlock(
-      `
-    pie title Pets adopted by volunteers
-    "Dogs" : 386
-    "Cats" : 85
-    "Rats" : 15
-`,
-      'js'
+      `pie title Pets adopted by volunteers
+        "Dogs" : 386
+        "Cats" : 85
+        "Rats" : 15`,
+      'mermaid'
     )
     .write();
 }
