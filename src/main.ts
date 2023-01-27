@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { issueCommand } from "@actions/core/lib/command"
 
 import * as path from 'path';
 
@@ -20,46 +21,20 @@ export async function run(actionInput: input.Input): Promise<void> {
   );
 
   try {
-    const code = await core.group(
-      'Running vale with reviewdog 🐶 ...',
-      async (): Promise<number> => {
-        // Vale output ...
-        const output = await exec.getExecOutput(
-          actionInput.exePath,
-          actionInput.args,
-          {
-            cwd,
-            ignoreReturnCode: true
-          }
-        );
+    const matcherFile = path.resolve(__dirname, "vale.json");
 
-        const vale_code = output.exitCode;
-        const should_fail = core.getInput('fail_on_error');
+    issueCommand("add-matcher", {}, matcherFile);
 
-        // Pipe to reviewdog ...
-        process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
-        return await exec.exec(
-          actionInput.reviewdog,
-          [
-            '-f=rdjsonl',
-            `-name=vale`,
-            `-reporter=${core.getInput('reporter')}`,
-            `-fail-on-error=${should_fail}`,
-            `-filter-mode=${core.getInput('filter_mode')}`,
-            //`-level=${vale_code == 1 && should_fail ? 'error' : 'info'}`
-          ],
-          {
-            cwd,
-            input: Buffer.from(output.stdout, 'utf-8'),
-            ignoreReturnCode: true
-          }
-        );
-      }
+    const code = await exec.exec(
+        actionInput.exePath,
+        actionInput.args,
+        {
+          cwd,
+          ignoreReturnCode: true
+        }
     );
 
-    if (code !== 0) {
-        core.setFailed(`reviewdog exited with status code: ${code}`);
-      }
+    issueCommand("remove-matcher", {owner: "vale"}, matcherFile);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
