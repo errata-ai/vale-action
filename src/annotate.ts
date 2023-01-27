@@ -72,7 +72,7 @@ export async function annotate(output: string) {
   await core.summary
     .addHeading('Linting Analysis :rocket:')
     .addQuote(
-      `**${totalAlerts}** total alerts (${suggestions} suggestions, ${warnings} warnings, and ${errors} errors).`
+      `<b>${totalAlerts}</b> total alerts (${suggestions} suggestions, ${warnings} warnings, and ${errors} errors).`
     )
     .addHeading('Annotation Breakdown', 2)
     .addCodeBlock(chart, 'mermaid')
