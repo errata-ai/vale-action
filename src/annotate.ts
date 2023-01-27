@@ -27,6 +27,8 @@ export async function annotate(output: string) {
   const alerts = JSON.parse(output) as ValeJSON;
 
   var alertsMap = new Map();
+  var alertTable: string[][] = [];
+
   for (const filename of Object.getOwnPropertyNames(alerts)) {
     for (const a of alerts[filename]) {
       if (alertsMap.has(a.Check)) {
@@ -34,8 +36,11 @@ export async function annotate(output: string) {
       } else {
         alertsMap.set(a.Check, 1);
       }
+      alertTable.push([filename, a.Check, a.Message]);
+
       const msg = `[${a.Check}] ${a.Message}`;
       const annotation = `file=${filename},line=${a.Line},col=${a.Span[0]}::${msg}`;
+
       switch (a.Severity) {
         case 'suggestion':
           core.info(`::notice ${annotation}`);
@@ -56,24 +61,15 @@ export async function annotate(output: string) {
   }
 
   await core.summary
-    .addHeading('Test Results')
+    .addHeading('Linting Results (`v2.22.0`)')
     .addTable([
       [
         {data: 'File', header: true},
-        {data: 'Result', header: true}
+        {data: 'Rule', header: true},
+        {data: 'Message', header: true}
       ],
-      ['foo.js', 'Pass ✅'],
-      ['bar.js', 'Fail ❌'],
-      ['test.js', 'Pass ✅']
+      ...alertTable
     ])
-    /*
-    .addCodeBlock(
-      `pie title Annotations by rule
-"Dogs" : 386
-"Cats" : 85
-"Rats" : 15`,
-      'mermaid'
-    )*/
     .addCodeBlock(chart, 'mermaid')
     .write();
 }
