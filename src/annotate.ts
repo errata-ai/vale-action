@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import {wasLineAddedInPR, GHFile} from './git';
 
 type Severity = 'suggestion' | 'warning' | 'error';
 
@@ -53,5 +52,14 @@ export async function annotate(output: string) {
       ['test.js', 'Pass ✅']
     ])
     .addLink('View staging deployment!', 'https://github.com')
+    .addCodeBlock(
+      `
+    pie title Pets adopted by volunteers
+    "Dogs" : 386
+    "Cats" : 85
+    "Rats" : 15
+`,
+      'js'
+    )
     .write();
 }
