@@ -3,6 +3,7 @@ import * as tc from '@actions/tool-cache';
 
 import * as request from 'request-promise-native';
 import path from 'path';
+import os from 'os';
 
 const releases = 'https://github.com/errata-ai/vale/releases/download';
 const last = 'https://github.com/errata-ai/vale/releases/latest/';
@@ -31,6 +32,30 @@ export async function installVale(version: string): Promise<string> {
     });
   }
 
-  const url = releases + `/v${version}/vale_${version}_Linux_64-bit.tar.gz`;
+  let ext = 'tar.gz';
+
+  let platform = os.platform().toString();
+  switch (platform) {
+    case 'win32':
+      platform = 'Windows';
+      ext = 'zip';
+      break;
+    case 'darwin':
+      platform = 'macOS';
+      break;
+    case 'linux':
+      platform = 'Linux';
+      break;
+  }
+
+  let arch = os.arch();
+  switch (arch) {
+    case 'x64':
+      arch = '64-bit';
+      break;
+  }
+
+  const url =
+    releases + `/v${version}/vale_${version}_${platform}_${arch}.tar.gz`;
   return installTool('vale', url);
 }
