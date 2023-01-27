@@ -34,7 +34,7 @@ export async function run(actionInput: input.Input): Promise<void> {
         }
     );
 
-    issueCommand("remove-matcher", {owner: "vale"}, matcherFile);
+    issueCommand("remove-matcher", {owner: "vale"}, "");
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
