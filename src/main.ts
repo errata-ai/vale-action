@@ -44,7 +44,9 @@ export async function run(actionInput: input.Input): Promise<void> {
             '-f=rdjsonl',
             `-name=vale`,
             `-reporter=${core.getInput('reporter')}`,
+            `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
+            `-level=${vale_code == 1 && should_fail ? 'error' : 'info'}`
           ],
           {
             cwd,
