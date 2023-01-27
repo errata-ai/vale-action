@@ -52,7 +52,7 @@ function logIfDebug(msg: string) {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
-  const reviewdog = await installTool('reviewdog', rd);
+  //const reviewdog = await installTool('reviewdog', rd);
   const valeFlags = core.getInput("vale_flags");
 
   let version = '';
@@ -65,8 +65,22 @@ export async function get(tok: string, dir: string): Promise<Input> {
   version = version.split(' ').slice(-1)[0];
   logIfDebug(`Using Vale ${version}`);
 
+  const parsedFlags = parse(valeFlags);
+  const userArgNames = new Set<string>(
+    valeFlags
+      .trim()
+      .split(/\s+/)
+      .map((arg) => arg.split(`=`)[0])
+      .filter((arg) => arg.startsWith(`-`))
+      .map((arg) => arg.replace(/^-+/, ``))
+  )
+
+  if (userArgNames.has(`output`)) {
+    throw new Error(`please, don't change the --output style.`)
+  }
+
   let stderr = '';
-  let resp = await exec.exec(localVale, [...parse(valeFlags), 'sync'], {
+  let resp = await exec.exec(localVale, [...parsedFlags, 'sync'], {
     cwd: dir,
     listeners: {
       stderr: (data: Buffer) => {
@@ -81,7 +95,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
 
   let args: string[] = [
     `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`,
-    ...parse(valeFlags),
+    ...parsedFlags,
   ];
 
   // Figure out what we're supposed to lint:
@@ -111,7 +125,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     token: tok,
     workspace: dir,
     exePath: localVale,
-    reviewdog: reviewdog,
+    reviewdog: path.resolve(__dirname, 'reviewdog'),
     args: args
   };
 }
