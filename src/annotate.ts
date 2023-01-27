@@ -1,5 +1,8 @@
 import * as core from '@actions/core';
 
+import fs from 'fs';
+import path from 'path';
+
 type Severity = 'suggestion' | 'warning' | 'error';
 
 interface Alert {
@@ -40,8 +43,10 @@ export async function annotate(output: string) {
     }
   }
 
+  var chart = fs.readFileSync(path.resolve(__dirname, 'rules.mermaid'));
   await core.summary
     .addHeading('Test Results')
+    .addRaw(chart.toString())
     .addTable([
       [
         {data: 'File', header: true},
