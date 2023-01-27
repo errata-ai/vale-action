@@ -14,7 +14,7 @@ interface ValeJSON {
   readonly [propName: string]: ReadonlyArray<Alert>;
 }
 
-export function annotate(output: string) {
+export async function annotate(output: string) {
   const alerts = JSON.parse(output) as ValeJSON;
   for (const filename of Object.getOwnPropertyNames(alerts)) {
     for (const a of alerts[filename]) {
@@ -32,4 +32,18 @@ export function annotate(output: string) {
       }
     }
   }
+
+  await core.summary
+    .addHeading('Test Results')
+    .addTable([
+      [
+        {data: 'File', header: true},
+        {data: 'Result', header: true}
+      ],
+      ['foo.js', 'Pass ✅'],
+      ['bar.js', 'Fail ❌'],
+      ['test.js', 'Pass ✅']
+    ])
+    .addLink('View staging deployment!', 'https://github.com')
+    .write();
 }

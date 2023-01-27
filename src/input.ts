@@ -4,10 +4,7 @@ import * as exec from '@actions/exec';
 import * as fs from 'fs';
 import path from 'path';
 
-import {installLint, installTool} from './install';
-
-const rd =
-  'https://github.com/reviewdog/reviewdog/releases/download/v0.14.1/reviewdog_0.14.1_Linux_x86_64.tar.gz';
+import {installVale} from './install';
 
 export function parse(flags: string): string[] {
   flags = flags.trim();
@@ -32,7 +29,6 @@ export interface Input {
   token: string;
   workspace: string;
   exePath: string;
-  reviewdog: string;
   args: string[];
 }
 
@@ -52,8 +48,7 @@ function logIfDebug(msg: string) {
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tok: string, dir: string): Promise<Input> {
-  const localVale = await installLint(core.getInput('version'));
-  //const reviewdog = await installTool('reviewdog', rd);
+  const localVale = await installVale(core.getInput('version'));
   const valeFlags = core.getInput('vale_flags');
 
   let version = '';
@@ -77,7 +72,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   );
 
   if (userArgNames.has(`output`)) {
-    throw new Error(`please, don't change the --output style.`);
+    throw new Error("Please don't change the `--output` style.");
   }
 
   let stderr = '';
@@ -94,11 +89,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     core.setFailed(stderr);
   }
 
-  let args: string[] = [
-    //`--output=${path.resolve(__dirname, 'matcher.tmpl')}`,
-    `--output=JSON`,
-    ...parsedFlags
-  ];
+  let args: string[] = [`--output=JSON`, ...parsedFlags];
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
@@ -127,7 +118,6 @@ export async function get(tok: string, dir: string): Promise<Input> {
     token: tok,
     workspace: dir,
     exePath: localVale,
-    reviewdog: path.resolve(__dirname, 'reviewdog'),
     args: args
   };
 }

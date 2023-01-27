@@ -27,7 +27,7 @@ export async function run(actionInput: input.Input): Promise<void> {
     });
 
     // Create annotations from Vale's JSON ouput ...
-    annotate.annotate(stdout);
+    await annotate.annotate(stdout);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
@@ -44,20 +44,6 @@ async function main(): Promise<void> {
 
     const actionInput = await input.get(userToken, workspace);
     await run(actionInput);
-
-    await core.summary
-      .addHeading('Test Results')
-      .addTable([
-        [
-          {data: 'File', header: true},
-          {data: 'Result', header: true}
-        ],
-        ['foo.js', 'Pass ✅'],
-        ['bar.js', 'Fail ❌'],
-        ['test.js', 'Pass ✅']
-      ])
-      .addLink('View staging deployment!', 'https://github.com')
-      .write();
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);

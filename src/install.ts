@@ -21,7 +21,7 @@ export async function installTool(name: string, url: string): Promise<string> {
   return path.join(extractedDir, name);
 }
 
-export async function installLint(version: string): Promise<string> {
+export async function installVale(version: string): Promise<string> {
   core.info(`Installing Vale version '${version}' ...`);
   if (version === 'latest') {
     await request.get(last, function(e, response) {
