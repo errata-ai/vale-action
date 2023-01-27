@@ -9,7 +9,7 @@
 
 ## Usage
 
-Add the the following (or similar) to one of your [`.github/workflows`][1] files:
+Add the following (or similar) to one of your [`.github/workflows`][1] files:
 
 ```yaml
 name: reviewdog
