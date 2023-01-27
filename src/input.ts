@@ -94,8 +94,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   }
 
   let args: string[] = [
-    `--no-wrap`,
-    //`--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`,
+    `--output=${path.resolve(__dirname, 'matcher.tmpl')}`,
     ...parsedFlags,
   ];
 

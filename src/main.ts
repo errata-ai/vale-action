@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import { issueCommand } from "@actions/core/lib/command"
 
 import path from 'path';
 import * as input from './input';
