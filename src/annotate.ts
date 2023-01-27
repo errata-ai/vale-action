@@ -14,11 +14,18 @@ interface ValeJSON {
   readonly [propName: string]: ReadonlyArray<Alert>;
 }
 
+/**
+ * Create file annotations from Vale's JSON output.
+ *
+ * NOTE: There some size limitations (https://rb.gy/lpeyey) which require us to
+ * only report the first 50.
+ */
 export async function annotate(output: string) {
   const alerts = JSON.parse(output) as ValeJSON;
   for (const filename of Object.getOwnPropertyNames(alerts)) {
     for (const a of alerts[filename]) {
-      const annotation = `file=${filename},line=${a.Line},col=${a.Span[0]}::${a.Message}`;
+      const msg = `[${a.Check}] ${a.Message}`;
+      const annotation = `file=${filename},line=${a.Line},col=${a.Span[0]}::${msg}`;
       switch (a.Severity) {
         case 'suggestion':
           core.info(`::notice ${annotation}`);

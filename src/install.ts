@@ -56,6 +56,7 @@ export async function installVale(version: string): Promise<string> {
   }
 
   const url =
-    releases + `/v${version}/vale_${version}_${platform}_${arch}.tar.gz`;
+    releases + `/v${version}/vale_${version}_${platform}_${arch}.${ext}`;
+
   return installTool('vale', url);
 }
