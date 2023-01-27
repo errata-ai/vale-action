@@ -56,10 +56,6 @@ export async function run(actionInput: input.Input): Promise<void> {
         );
       }
     );
-
-    if (code !== 0) {
-      core.setFailed(`reviewdog exited with status code: ${code}`);
-    }
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
