@@ -2,8 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { issueCommand } from "@actions/core/lib/command"
 
-import * as path from 'path';
-
+import path from 'path';
 import * as input from './input';
 
 /**
@@ -21,9 +20,8 @@ export async function run(actionInput: input.Input): Promise<void> {
   );
 
   try {
-    const matcherFile = path.resolve(__dirname, "vale.json");
-
-    issueCommand("add-matcher", {}, matcherFile);
+    const matchersPath = path.join(__dirname, 'vale.json');
+    core.info(`##[add-matcher]${matchersPath}`);
 
     const code = await exec.exec(
         actionInput.exePath,
@@ -33,8 +31,6 @@ export async function run(actionInput: input.Input): Promise<void> {
           ignoreReturnCode: true
         }
     );
-
-    issueCommand("remove-matcher", {owner: "vale"}, "");
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
