@@ -9,7 +9,7 @@
 
 ## Usage
 
-Add the following (or similar) to one of your [`.github/workflows`][1] files:
+Add the the following (or similar) to one of your [`.github/workflows`][1] files:
 
 ```yaml
 name: reviewdog
@@ -85,7 +85,7 @@ You can supply this value one of four ways:
 - `files: '["input1", "input2"]'`: A JSON-formatted list of file or directory arguments; equivalent to calling `vale input1 input2`.
 
 - `files: 'input1,input2'`: A character-delimited list of files. The character is determined by the input value `separator`:
-    
+
     ```yaml
     with:
       separator: ","
