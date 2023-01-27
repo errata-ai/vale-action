@@ -29,8 +29,14 @@ export async function annotate(output: string) {
   var alertsMap = new Map();
   var alertTable: string[][] = [];
 
+  var totalAlerts = 0;
+  var suggestions = 0;
+  var warnings = 0;
+  var errors = 0;
+
   for (const filename of Object.getOwnPropertyNames(alerts)) {
     for (const a of alerts[filename]) {
+      totalAlerts += 1;
       if (alertsMap.has(a.Check)) {
         alertsMap.set(a.Check, alertsMap.get(a.Check) + 1);
       } else {
@@ -44,12 +50,15 @@ export async function annotate(output: string) {
       switch (a.Severity) {
         case 'suggestion':
           core.info(`::notice ${annotation}`);
+          suggestions += 1;
           break;
         case 'warning':
           core.info(`::warning ${annotation}`);
+          warnings += 1;
           break;
         default:
           core.info(`::error ${annotation}`);
+          errors += 1;
           break;
       }
     }
@@ -61,16 +70,19 @@ export async function annotate(output: string) {
   }
 
   await core.summary
-    .addRaw('# Linting Results (`v2.22.0`)', true)
+    .addHeading('Linting Analysis :rocket:')
+    .addRaw(
+      `**${totalAlerts}** total alerts (${suggestions} suggestions, ${warnings} warnings, and ${errors} errors).`
+    )
+    .addHeading('Annotation Breakdown', 2)
     .addCodeBlock(chart, 'mermaid')
-    .addRaw('## File Summary', true)
-    .addTable([
+    /*.addTable([
       [
         {data: 'File', header: true},
         {data: 'Rule', header: true},
         {data: 'Message', header: true}
       ],
       ...alertTable
-    ])
+    ])*/
     .write();
 }
