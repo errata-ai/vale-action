@@ -25,8 +25,15 @@ interface ValeJSON {
  */
 export async function annotate(output: string) {
   const alerts = JSON.parse(output) as ValeJSON;
+
+  var alertsMap = new Map();
   for (const filename of Object.getOwnPropertyNames(alerts)) {
     for (const a of alerts[filename]) {
+      if (alertsMap.has(a.Check)) {
+        alertsMap.set(a.Check, alertsMap.get(a.Check) + 1);
+      } else {
+        alertsMap.set(a.Check, 1);
+      }
       const msg = `[${a.Check}] ${a.Message}`;
       const annotation = `file=${filename},line=${a.Line},col=${a.Span[0]}::${msg}`;
       switch (a.Severity) {
@@ -43,10 +50,13 @@ export async function annotate(output: string) {
     }
   }
 
-  var chart = fs.readFileSync(path.resolve(__dirname, 'rules.mermaid'));
+  var chart = 'pie title Annotations by rule';
+  for (let [key, value] of alertsMap) {
+    chart += `\n"${key}" : ${value}`;
+  }
+
   await core.summary
     .addHeading('Test Results')
-    .addRaw(chart.toString())
     .addTable([
       [
         {data: 'File', header: true},
@@ -56,13 +66,14 @@ export async function annotate(output: string) {
       ['bar.js', 'Fail ❌'],
       ['test.js', 'Pass ✅']
     ])
-    .addLink('View staging deployment!', 'https://github.com')
+    /*
     .addCodeBlock(
-      `pie title Pets adopted by volunteers
+      `pie title Annotations by rule
 "Dogs" : 386
 "Cats" : 85
 "Rats" : 15`,
       'mermaid'
-    )
+    )*/
+    .addCodeBlock(chart, 'mermaid')
     .write();
 }
