@@ -10,7 +10,7 @@
 
 {{- $error := .Severity -}}
 {{- if eq .Severity "suggestion" -}}
-    {{- $error = "notice" -}}
+    {{- $error = "info" -}}
 {{- end}}
 
 {{- /* Variables setup */ -}}
