@@ -61,7 +61,9 @@ export async function annotate(output: string) {
   }
 
   await core.summary
-    .addHeading('Linting Results (`v2.22.0`)')
+    .addRaw('# Linting Results (`v2.22.0`)')
+    .addCodeBlock(chart, 'mermaid')
+    .addRaw('## File Summary')
     .addTable([
       [
         {data: 'File', header: true},
@@ -70,6 +72,5 @@ export async function annotate(output: string) {
       ],
       ...alertTable
     ])
-    .addCodeBlock(chart, 'mermaid')
     .write();
 }
