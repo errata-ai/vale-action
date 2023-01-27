@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 
 import path from 'path';
+import execa from 'execa';
 import * as input from './input';
 
 /**
@@ -30,15 +31,16 @@ function annotate(output: string) {
     const alerts = JSON.parse(output) as ValeJSON;
     for (const filename of Object.getOwnPropertyNames(alerts)) {
         for (const a of alerts[filename]) {
+            const annotation = `file=${filename},line=${a.Line},col=${a.Span[0]}::${a.Message}`;
             switch (a.Severity) {
                 case 'suggestion':
-                    core.info(`::notice file=${filename},line=${a.Line},col=${a.Span[0]}::${a.Message}`)
+                    core.info(`::notice ${annotation}`)
                     break;
                 case 'warning':
-                    core.info(`::warning file=${filename},line=${a.Line},col=${a.Span[0]}::${a.Message}`)
+                    core.info(`::warning ${annotation}`)
                     break;
                 default:
-                    core.info(`::error file=${filename},line=${a.Line},col=${a.Span[0]}::${a.Message}`)
+                    core.info(`::error ${annotation}`)
                     break;
             }
         }
@@ -53,20 +55,8 @@ export async function run(actionInput: input.Input): Promise<void> {
   );
 
   try {
-    const matchersPath = path.join(__dirname, 'vale.json');
-    //core.info(`##[add-matcher]${matchersPath}`);
-
-    // echo "::error file=app.js,line=10,col=15::$text"
-
-    const alerts = await exec.getExecOutput(
-        actionInput.exePath,
-        actionInput.args,
-        {
-          cwd,
-          ignoreReturnCode: true
-        }
-    );
-    annotate(alerts.stdout);
+    const {stdout} = await execa(actionInput.exePath, actionInput.args);
+    annotate(stdout);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
