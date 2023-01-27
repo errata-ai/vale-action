@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import {wasLineAddedInPR, GHFile} from './git';
 
 type Severity = 'suggestion' | 'warning' | 'error';
 

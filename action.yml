@@ -21,29 +21,12 @@ inputs:
     required: false
     default: "false"
 
-  reporter:
-    description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]."
-    required: false
-    default: "github-pr-check"
-
   fail_on_error:
     description: |
       Exit code for reviewdog when errors are found [true,false]
       Default is `false`.
     required: false
     default: "false"
-
-  level:
-    description: "Report level for reviewdog [info,warning,error]."
-    required: false
-    default: "error"
-
-  filter_mode:
-    description: |
-      Filtering for the reviewdog command [added,diff_context,file,nofilter].
-      Default is added.
-    required: false
-    default: "added"
 
   vale_flags:
     description: "Space-delimited list of flags for the Vale CLI."
