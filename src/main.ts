@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 
 import path from 'path';
 import execa from 'execa';
+
 import * as input from './input';
 
 /**
@@ -73,6 +73,18 @@ async function main(): Promise<void> {
 
     const actionInput = await input.get(userToken, workspace);
     await run(actionInput);
+
+    await core.summary
+        .addHeading('Test Results')
+        .addTable([
+            [{data: 'File', header: true}, {data: 'Result', header: true}],
+            ['foo.js', 'Pass ✅'],
+            ['bar.js', 'Fail ❌'],
+            ['test.js', 'Pass ✅']
+        ])
+        .addLink('View staging deployment!', 'https://github.com')
+        .write()
+
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);

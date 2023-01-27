@@ -9,8 +9,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./ # Uses an action in the root directory
         with:
-          reporter: github-check
-          fail_on_error: true
-          debug: true
+          debug: false
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
