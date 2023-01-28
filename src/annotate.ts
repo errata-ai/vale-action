@@ -73,9 +73,9 @@ export async function annotate(output: string) {
   }
 
   await core.summary
-    .addHeading(':mag: Analysis :mag:')
+    .addHeading('Analysis :mag:')
     .addQuote(
-      `<b>${totalAlerts}</b> total alerts (${suggestions} suggestion(s), ${warnings} warning(s), and ${errors} error(s)) in <b>${files}</b> file(s).`
+      `<b>${totalAlerts}</b> alerts (${suggestions} <code>suggestion</code>, ${warnings} <code>warning</code>, and ${errors} <code>error</code>) in <b>${files}</b> file(s).`
     )
     .addRaw(
       `<div align="center">
@@ -83,7 +83,6 @@ export async function annotate(output: string) {
 <thead>
 <tr>
 <th><a href="https://vale.sh/docs/vale-cli/installation/">Documentation</a></th>
-<th><a href="https://vale.sh/#users">Case Studies</a></th>
 <th><a href="https://vale.sh/hub/">Package Hub</a></th>
 <th><a href="https://vale.sh/explorer/">Rule Explorer</a></th>
 <th><a href="https://vale.sh/generator/">Config Generator</a></th>
