@@ -29,12 +29,15 @@ export async function annotate(output: string) {
   var alertsMap = new Map();
   var alertTable: string[][] = [];
 
+  var files = 0;
+
   var totalAlerts = 0;
   var suggestions = 0;
   var warnings = 0;
   var errors = 0;
 
   for (const filename of Object.getOwnPropertyNames(alerts)) {
+    files += 1;
     for (const a of alerts[filename]) {
       totalAlerts += 1;
       if (alertsMap.has(a.Check)) {
@@ -70,9 +73,25 @@ export async function annotate(output: string) {
   }
 
   await core.summary
-    .addHeading('Linting Analysis :rocket:')
+    .addHeading(':mag: Analysis :mag:')
     .addQuote(
-      `<b>${totalAlerts}</b> total alerts (${suggestions} suggestions, ${warnings} warnings, and ${errors} errors).`
+      `<b>${totalAlerts}</b> total alerts (${suggestions} suggestion(s), ${warnings} warning(s), and ${errors} error(s)) in <b>${files}</b> file(s).`
+    )
+    .addRaw(
+      `<div align="center">
+<table>
+<thead>
+<tr>
+<th><a href="https://vale.sh/docs/vale-cli/installation/">Documentation</a></th>
+<th><a href="https://vale.sh/#users">Case Studies</a></th>
+<th><a href="https://vale.sh/hub/">Package Hub</a></th>
+<th><a href="https://vale.sh/explorer/">Rule Explorer</a></th>
+<th><a href="https://vale.sh/generator/">Config Generator</a></th>
+</tr>
+</thead>
+</table>
+</div>`,
+      true
     )
     .addHeading('Annotation Breakdown', 2)
     .addCodeBlock(chart, 'mermaid')
