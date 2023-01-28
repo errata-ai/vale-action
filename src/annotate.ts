@@ -77,6 +77,7 @@ export async function annotate(output: string) {
     .addQuote(
       `<b>${totalAlerts}</b> alerts (${suggestions} <code>suggestion</code>, ${warnings} <code>warning</code>, and ${errors} <code>error</code>) in <b>${files}</b> file(s).`
     )
+    .addHeading('Annotation Breakdown', 2)
     .addCodeBlock(chart, 'mermaid')
     /*.addTable([
       [
