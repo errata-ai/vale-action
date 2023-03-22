@@ -22,10 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: errata-ai/vale-action@reviewdog
-        env:
-          # Required, set by GitHub actions automatically:
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```
 
 ## Repository Structure
@@ -129,6 +125,15 @@ Space-delimited list of flags for the Vale CLI. To see a full list of available 
 ```yaml
 with:
   vale_flags: "--glob=*.txt"
+```
+
+### `token` (default: [`secrets.GITHUB_TOKEN`](https://docs.github.com/en/actions/security-guides/automatic-token-authentication))
+
+The GitHub token to use.
+
+```yaml
+with:
+  token: ${{secrets.VALE_GITHUB_TOKEN}}
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow

@@ -55,6 +55,11 @@ inputs:
     required: false
     default: ""
 
+  token:
+    description: "The GitHub token to use."
+    required: false
+    default: ${{ github.token }}
+
 runs:
   using: docker
   image: Dockerfile

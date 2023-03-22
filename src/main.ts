@@ -10,7 +10,7 @@ import * as input from './input';
  *
  * See https://bit.ly/2WlFUD7 for more information.
  */
-const {GITHUB_TOKEN, GITHUB_WORKSPACE} = process.env;
+const {GITHUB_WORKSPACE} = process.env;
 
 export async function run(actionInput: input.Input): Promise<void> {
   const workdir = core.getInput('workdir') || '.';
@@ -37,7 +37,7 @@ export async function run(actionInput: input.Input): Promise<void> {
         const should_fail = core.getInput('fail_on_error');
 
         // Pipe to reviewdog ...
-        process.env['REVIEWDOG_GITHUB_API_TOKEN'] = GITHUB_TOKEN;
+        process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
         return await exec.exec(
           '/bin/reviewdog',
           [
@@ -71,7 +71,7 @@ export async function run(actionInput: input.Input): Promise<void> {
 
 async function main(): Promise<void> {
   try {
-    const userToken = GITHUB_TOKEN as string;
+    const userToken = core.getInput('token');
     const workspace = GITHUB_WORKSPACE as string;
 
     const actionInput = await input.get(userToken, workspace);
