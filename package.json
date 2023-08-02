@@ -1,50 +1,50 @@
 {
-  "name": "vale-action",
-  "version": "1.0.4",
-  "description": "The official GitHub Action for Vale -- install, manage, and run Vale with ease.",
-  "main": "lib/main.js",
-  "scripts": {
-    "build": "tsc",
-    "build-min": "ncc build src/main.ts --minify",
-    "format": "prettier --write **/*.ts",
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/errata-ai/vale-action.git"
-  },
-  "keywords": [
-    "actions",
-    "container",
-    "toolkit",
-    "setup"
-  ],
-  "author": "jdkato",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/errata-ai/vale-action/issues"
-  },
-  "homepage": "https://github.com/errata-ai/vale-action",
-  "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "1.1.1",
-    "@actions/github": "^5.1.1",
-    "@actions/tool-cache": "^2.0.1",
-    "@types/request-promise-native": "^1.0.17",
-    "@types/tmp": "^0.2.3",
-    "execa": "^7.2.0",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.7",
-    "tmp": "^0.2.1"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.3",
-    "@types/node": "^20.4.6",
-    "@zeit/ncc": "^0.22.3",
-    "jest": "^29.6.2",
-    "jest-circus": "^29.6.2",
-    "prettier": "^3.0.0",
-    "ts-jest": "^29.0.3",
-    "typescript": "^5.1.6"
-  }
+    "name": "vale-action",
+    "version": "1.0.4",
+    "description": "The official GitHub Action for Vale -- install, manage, and run Vale with ease.",
+    "main": "lib/main.js",
+    "scripts": {
+        "build": "tsc",
+        "build-min": "ncc build src/main.ts --minify",
+        "format": "prettier --write **/*.ts",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/errata-ai/vale-action.git"
+    },
+    "keywords": [
+        "actions",
+        "container",
+        "toolkit",
+        "setup"
+    ],
+    "author": "jdkato",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/errata-ai/vale-action/issues"
+    },
+    "homepage": "https://github.com/errata-ai/vale-action",
+    "dependencies": {
+        "@actions/core": "1.9.1",
+        "@actions/exec": "1.1.1",
+        "@actions/github": "^3.0.0",
+        "@actions/tool-cache": "^1.7.2",
+        "@types/request-promise-native": "^1.0.17",
+        "@types/tmp": "^0.1.0",
+        "execa": "^3.2.0",
+        "request": "^2.88.0",
+        "request-promise-native": "^1.0.7",
+        "tmp": "^0.1.0"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.13",
+        "@types/node": "^14.0.13",
+        "@zeit/ncc": "^0.22.3",
+        "jest": "^24.8.0",
+        "jest-circus": "^24.7.1",
+        "prettier": "^1.17.1",
+        "ts-jest": "^29.0.3",
+        "typescript": "^3.9.5"
+    }
 }
