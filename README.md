@@ -52,6 +52,14 @@ BasedOnStyles = Vale
 
 You can further customize the linting processing by providing one of the following optional inputs.
 
+To add an input, edit your workflow file and add the `with` key to the `uses` block. For example:
+
+```yaml
+- uses: errata-ai/vale-action@reviewdog
+  with:
+    version: 2.17.0
+```
+
 ### `version` (default: latest)
 
 > NOTE: The provided version must be `>= 2.16.0`.
