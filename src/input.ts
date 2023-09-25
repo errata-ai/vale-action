@@ -1,20 +1,20 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-
 import * as fs from 'fs';
 import * as path from 'path';
+import { installLint, installReviewDog } from './install';
 
-import {installLint} from './install';
+
 
 export function parse(flags: string): string[] {
-    flags = flags.trim();
-    if (flags === "") {
-      return [];
-    }
-
-    // TODO: need to simulate bash?
-    return flags.split(/\s+/);
+  flags = flags.trim();
+  if (flags === "") {
+    return [];
   }
+
+  // TODO: need to simulate bash?
+  return flags.split(/\s+/);
+}
 
 /**
  * Our expected input.
@@ -29,6 +29,7 @@ export interface Input {
   token: string;
   workspace: string;
   exePath: string;
+  reviewdogPath: string;
   args: string[];
 }
 
@@ -49,6 +50,7 @@ function logIfDebug(msg: string) {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
+  const localReviewDog = await installReviewDog("0.15.0");
   const valeFlags = core.getInput("vale_flags");
 
   let version = '';
@@ -104,12 +106,13 @@ export async function get(tok: string, dir: string): Promise<Input> {
     }
   }
 
-  logIfDebug(`Vale set-up complete; using '${args}'.`);
+  logIfDebug(`Vale set-up complete; using '${args}' with ${localReviewDog}.`);
 
   return {
     token: tok,
     workspace: dir,
     exePath: localVale,
-    args: args
+    args: args,
+    reviewdogPath: localReviewDog,
   };
 }

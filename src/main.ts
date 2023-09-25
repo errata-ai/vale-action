@@ -1,16 +1,16 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-
 import * as path from 'path';
-
 import * as input from './input';
+
+
 
 /**
  * These environment variables are exposed for GitHub Actions.
  *
  * See https://bit.ly/2WlFUD7 for more information.
  */
-const {GITHUB_WORKSPACE} = process.env;
+const { GITHUB_WORKSPACE } = process.env;
 
 export async function run(actionInput: input.Input): Promise<void> {
   const workdir = core.getInput('workdir') || '.';
@@ -29,7 +29,10 @@ export async function run(actionInput: input.Input): Promise<void> {
           actionInput.args,
           {
             cwd,
-            ignoreReturnCode: true
+            ignoreReturnCode: true,
+            env: {
+              "PATH": `${process.env["PATH"]}:/home/runner/.local/share/gem/ruby/3.0.0/bin`
+            }
           }
         );
 
@@ -39,15 +42,14 @@ export async function run(actionInput: input.Input): Promise<void> {
         // Pipe to reviewdog ...
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
         return await exec.exec(
-          '/bin/reviewdog',
+          actionInput.reviewdogPath,
           [
             '-f=rdjsonl',
             `-name=vale`,
             `-reporter=${core.getInput('reporter')}`,
             `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${
-              vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
+            `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
             }`
           ],
           {
