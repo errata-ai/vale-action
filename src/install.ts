@@ -31,10 +31,13 @@ export async function installLint(version: string): Promise<string> {
   return lintPath;
 }
 
-export async function installReviewDog(version: string): Promise<string> {
+export async function installReviewDog(version: string, url?: string): Promise<string> {
   core.info(`Installing ReviewDog version '${version}' ...`);
   
-  const url = `https://github.com/reviewdog/reviewdog/releases/download/v${version}/reviewdog_${version}_Linux_x86_64.tar.gz`;
+  if (!url){
+    url = `https://github.com/reviewdog/reviewdog/releases/download/v${version}/reviewdog_${version}_Linux_x86_64.tar.gz`;
+  }
+
   const archivePath = await tc.downloadTool(url);
 
   let extractedDir = '';
@@ -47,7 +50,7 @@ export async function installReviewDog(version: string): Promise<string> {
   extractedDir = await tc.extractTar(archivePath, process.env.HOME, args);
 
   const reviewdogPath = path.join(extractedDir, `reviewdog`);
-  core.info(`Installed version '${version}' into '${reviewdogPath}'.`);
 
+  core.info(`Installed reviewdog from '${url}' into '${reviewdogPath}'.`);
   return reviewdogPath;
 }
