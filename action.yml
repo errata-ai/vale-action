@@ -55,6 +55,11 @@ inputs:
     required: false
     default: ""
 
+  reviewdog_url:
+    description: "The URL to a tar.gz build of reviewdog to use in the action"
+    required: false
+    default: ""
+
   token:
     description: "The GitHub token to use."
     required: false
