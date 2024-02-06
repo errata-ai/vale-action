@@ -22,9 +22,9 @@ inputs:
     default: "false"
 
   reporter:
-    description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-check]."
+    description: "Reporter of reviewdog command [github-pr-check,github-pr-review,github-pr-annotations,github-check]."
     required: false
-    default: "github-pr-check"
+    default: "github-pr-annotations"
 
   fail_on_error:
     description: |
