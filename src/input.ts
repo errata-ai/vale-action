@@ -58,7 +58,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   logIfDebug('`gem install asciidoctor --user-install` complete');
 
   const localVale = await installLint(core.getInput('version'));
-  const localReviewDog = await installReviewDog("0.15.0", core.getInput('reviewdog_url'));
+  const localReviewDog = await installReviewDog("0.17.0", core.getInput('reviewdog_url'));
   const valeFlags = core.getInput("vale_flags");
 
   let version = '';
