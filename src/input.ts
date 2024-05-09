@@ -1,14 +1,13 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as fs from 'fs';
+import {globSync} from 'glob';
 import * as path from 'path';
-import { installLint, installReviewDog } from './install';
-
-
+import {installLint, installReviewDog} from './install';
 
 export function parse(flags: string): string[] {
   flags = flags.trim();
-  if (flags === "") {
+  if (flags === '') {
     return [];
   }
 
@@ -58,8 +57,11 @@ export async function get(tok: string, dir: string): Promise<Input> {
   logIfDebug('`gem install asciidoctor --user-install` complete');
 
   const localVale = await installLint(core.getInput('version'));
-  const localReviewDog = await installReviewDog("0.17.0", core.getInput('reviewdog_url'));
-  const valeFlags = core.getInput("vale_flags");
+  const localReviewDog = await installReviewDog(
+    '0.17.0',
+    core.getInput('reviewdog_url')
+  );
+  const valeFlags = core.getInput('vale_flags');
 
   let version = '';
   await exec.exec(localVale, ['-v'], {
@@ -87,19 +89,22 @@ export async function get(tok: string, dir: string): Promise<Input> {
 
   let args: string[] = [
     `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`,
-    ...parse(valeFlags),
+    ...parse(valeFlags)
   ];
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
   const delim = core.getInput('separator');
+  const glob = core.getInput('glob');
 
   if (files == 'all') {
     args.push('.');
   } else if (fs.existsSync(path.resolve(dir, files))) {
     args.push(files);
-  } else if (delim !== "") {
+  } else if (delim !== '') {
     args = args.concat(files.split(delim));
+  } else if (glob === 'true') {
+    args = args.concat(globSync(files));
   } else {
     try {
       // Support for an array of inputs.
@@ -121,6 +126,6 @@ export async function get(tok: string, dir: string): Promise<Input> {
     workspace: dir,
     exePath: localVale,
     args: args,
-    reviewdogPath: localReviewDog,
+    reviewdogPath: localReviewDog
   };
 }

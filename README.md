@@ -80,7 +80,7 @@ with:
   files: path/to/lint
 ```
 
-You can supply this value one of four ways:
+You can supply this value one of five ways:
 
 - `files: all` (default): The repo's root directory; equivalent to calling `vale .`.
 
@@ -93,6 +93,13 @@ You can supply this value one of four ways:
     ```yaml
     with:
       separator: ","
+    ```
+
+- `files: 'path/**/with/*/glob'`: When the input `glob` is set to `"true"`, a glob pattern to return files; equivalent to calling `vale --glob path/**/with/*/glob`.
+
+    ```yaml
+    with:
+      glob: "true"
     ```
 
 ### `reporter` (default: github-pr-check)
