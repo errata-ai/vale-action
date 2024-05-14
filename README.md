@@ -130,6 +130,10 @@ with:
 
 Space-delimited list of flags for the Vale CLI. To see a full list of available flags, run `vale -h`.
 
+Note that flags should not include quotes.
+So while `--glob='*.txt'" works with Vale, it does not work with this action.
+Use the flag without quotes, as in the following example:
+
 ```yaml
 with:
   vale_flags: "--glob=*.txt"
