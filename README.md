@@ -107,11 +107,8 @@ with:
 
 ### `fail_on_error` (default: false)
 
-:::warning
-
-This input is deprecated. Use [`fail_level`](#fail_level-default-none) instead. 
-
-:::
+> [!WARNING]
+> This input is deprecated. Use [`fail_level`](#fail_level-default-none) instead. If `fail_level` and `fail_on_error` are both set, `fail_level` takes precedence.
 
 By default, `reviewdog` will return exit code `0` even if it finds errors. If `fail_on_error` is enabled, `reviewdog` exits with `1` when at least one error
 was reported.
