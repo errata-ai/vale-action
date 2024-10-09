@@ -21,7 +21,7 @@ export async function run(actionInput: input.Input): Promise<void> {
 
   try {
     const code = await core.group(
-      'Running vale with reviewdog 🐶 ...',
+      'Running vale...',
       async (): Promise<number> => {
         // Vale output ...
         const output = await exec.getExecOutput(
@@ -37,10 +37,19 @@ export async function run(actionInput: input.Input): Promise<void> {
         );
 
         const vale_code = output.exitCode;
+        'Vale return code: ${vale_code}'
+        // Check for fatal runtime errors only (exit code 2)
+        // These aren't linting errors, but ones that will come
+        // about from missing or bad configuration files, etc.
+        if (vale_code === 2) {
+          return 2; // Exit the function early
+        }
+
         const should_fail = core.getInput('fail_on_error');
         const should_fail_on_level = core.getInput('fail_level');
 
         // Pipe to reviewdog ...
+        core.info('Calling reviewdog 🐶');
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
         
         // Support deprecated -fail-on-error option
@@ -86,7 +95,7 @@ export async function run(actionInput: input.Input): Promise<void> {
     );
 
     if (code !== 0) {
-      core.setFailed(`reviewdog exited with status code: ${code}`);
+      core.setFailed(`Vale and reviewdog exited with status code: ${code}`);
     }
   } catch (error) {
     if (error instanceof Error) {
