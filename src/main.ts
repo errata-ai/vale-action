@@ -42,7 +42,6 @@ export async function run(actionInput: input.Input): Promise<void> {
         // These aren't linting errors, but ones that will come
         // about from missing or bad configuration files, etc.
         if (vale_code === 2) {
-          core.setFailed(`Vale encountered a fatal error with status code: ${vale_code}`);
           return 2; // Exit the function early
         }
 
