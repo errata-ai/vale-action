@@ -49,14 +49,6 @@ function logIfDebug(msg: string) {
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tok: string, dir: string): Promise<Input> {
-  logIfDebug('Ensuring core python and ruby dependencies are present');
-
-  await exec.exec('pip', ['install', 'docutils']);
-  logIfDebug('`pip install docutils` complete');
-
-  await exec.exec('gem', ['install', 'asciidoctor', '--user-install']);
-  logIfDebug('`gem install asciidoctor --user-install` complete');
-
   const localVale = await installLint(core.getInput('version'));
   const localReviewDog = await installReviewDog("0.17.0", core.getInput('reviewdog_url'));
   const valeFlags = core.getInput("vale_flags");

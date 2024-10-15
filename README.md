@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: errata-ai/vale-action@reviewdog
+      - uses: errata-ai/vale-action@v2.1.0
 ```
 
 ## Repository Structure
@@ -55,7 +55,7 @@ You can further customize the linting processing by providing one of the followi
 To add an input, edit your workflow file and add the `with` key to the `uses` block. For example:
 
 ```yaml
-- uses: errata-ai/vale-action@reviewdog
+- uses: errata-ai/vale-action@v2.1.0
   with:
     version: 2.17.0
 ```
