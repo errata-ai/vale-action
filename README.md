@@ -9,6 +9,10 @@
 
 ## Usage
 
+> [!NOTE]
+> If you're using a markup format other than Markdown, you may need to install
+> an external parser. For more information, see the [Vale documentation][2].
+
 Add the following (or similar) to one of your [`.github/workflows`][1] files:
 
 ```yaml
@@ -149,3 +153,4 @@ with:
 ```
 
 [1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
+[2]: https://vale.sh/docs/topics/scoping/#formats
