@@ -20,7 +20,7 @@ jobs:
     name: runner / vale
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: errata-ai/vale-action@v2.1.0
 ```
 
