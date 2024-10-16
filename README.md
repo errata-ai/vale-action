@@ -28,6 +28,12 @@ jobs:
       - uses: errata-ai/vale-action@v2.1.1
 ```
 
+> [!TIP]
+> To use it with asciidoc add the following step to your workflow before calling `vale-action`:
+> ```yaml
+>       - name: Install Asciidoctor
+>         run: sudo apt-get install -y asciidoctor
+
 ## Repository Structure
 
 The recommended repository structure makes use of the existing `.github` directory to hold all of our Vale-related resources:
