@@ -46,27 +46,51 @@ export async function run(actionInput: input.Input): Promise<void> {
         }
 
         const should_fail = core.getInput('fail_on_error');
+        const should_fail_on_level = core.getInput('fail_level');
 
         // Pipe to reviewdog ...
         core.info('Calling reviewdog 🐶');
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
-        return await exec.exec(
-          actionInput.reviewdogPath,
-          [
-            '-f=rdjsonl',
-            `-name=vale`,
-            `-reporter=${core.getInput('reporter')}`,
-            `-fail-on-error=${should_fail}`,
-            `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
-            }`
-          ],
-          {
-            cwd,
-            input: Buffer.from(output.stdout, 'utf-8'),
-            ignoreReturnCode: true
-          }
-        );
+        
+        // Support deprecated -fail-on-error option
+        if (should_fail === 'true' && should_fail_on_level === 'none') {
+          return await exec.exec(
+            actionInput.reviewdogPath,
+            [
+              '-f=rdjsonl',
+              `-name=vale`,
+              `-reporter=${core.getInput('reporter')}`,
+              `-fail-on-error=true`,
+              `-filter-mode=${core.getInput('filter_mode')}`,
+              `-level=${vale_code == 1 ? 'error' : 'info'}`
+            ],
+            {
+              cwd,
+              input: Buffer.from(output.stdout, 'utf-8'),
+              ignoreReturnCode: true
+            }
+          );
+        } else {
+          return await exec.exec(
+            actionInput.reviewdogPath,
+            [
+              '-f=rdjsonl',
+              `-name=vale`,
+              `-reporter=${core.getInput('reporter')}`,
+              `-fail-level=${should_fail_on_level}`,
+              `-filter-mode=${core.getInput('filter_mode')}`,
+              `-level=${vale_code == 1 && (should_fail_on_level === 'error' ||
+                                           should_fail_on_level === 'warning' ||
+                                           should_fail_on_level === 'info') ? should_fail_on_level : 'info'}`
+            ],
+            {
+              cwd,
+              input: Buffer.from(output.stdout, 'utf-8'),
+              ignoreReturnCode: true
+            }
+          );
+        }
+        
       }
     );
 

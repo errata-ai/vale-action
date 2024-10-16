@@ -111,12 +111,25 @@ with:
 
 ### `fail_on_error` (default: false)
 
+> [!WARNING]
+> This input is deprecated. Use [`fail_level`](#fail_level-default-none) instead. If `fail_level` and `fail_on_error` are both set, `fail_level` takes precedence.
+
 By default, `reviewdog` will return exit code `0` even if it finds errors. If `fail_on_error` is enabled, `reviewdog` exits with `1` when at least one error
 was reported.
 
 ```yaml
 with:
   fail_on_error: true
+```
+
+### `fail_level` (default: none)
+
+
+By default, `reviewdog` will return exit code `0`. If `fail_level` is set to `any`, `info`, `warning`, or `error`, `reviewdog` exits with code `1` if it finds at least one issue with severity greater than or equal to the given setting.
+
+```yaml
+with:
+  fail_level: any
 ```
 
 ### `filter_mode` (default: added)

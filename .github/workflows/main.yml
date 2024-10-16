@@ -6,10 +6,10 @@ jobs:
     name: runner / vale
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ./ # Uses an action in the root directory
         with:
           reporter: github-check
-          fail_on_error: true
+          fail_level: error
           level: warning
           debug: true

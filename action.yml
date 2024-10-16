@@ -28,10 +28,17 @@ inputs:
 
   fail_on_error:
     description: |
-      Exit code for reviewdog when errors are found [true,false]
+      (Deprecated) Exit code for reviewdog when errors are found [true,false]
       Default is `false`.
     required: false
     default: "false"
+
+  fail_level:
+    description: |
+      Minimum report level at which reviewdog exits with code `1` [none,any,info,warning,error]
+      Default is `none`.
+    required: false
+    default: "none"
 
   level:
     description: "Report level for reviewdog [info,warning,error]."
