@@ -52,7 +52,7 @@ export async function run(actionInput: input.Input): Promise<void> {
         core.info('Calling reviewdog 🐶');
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
         
-        options = [
+        var options = [
           '-f=rdjsonl',
           `-name=vale`,
           `-reporter=${core.getInput('reporter')}`,
@@ -65,7 +65,7 @@ export async function run(actionInput: input.Input): Promise<void> {
           options.push(`-fail-level=${should_fail_on_level}`);
           options.push(`-level=${vale_code == 1 ? should_fail_on_level : 'info'}`);
         }
-        return yield exec.exec(actionInput.reviewdogPath, options, {
+        return await exec.exec(actionInput.reviewdogPath, options, {
           cwd,
           input: Buffer.from(output.stdout, 'utf-8'),
           ignoreReturnCode: true
