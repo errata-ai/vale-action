@@ -3,14 +3,12 @@ import * as exec from '@actions/exec';
 import * as path from 'path';
 import * as input from './input';
 
-
-
 /**
  * These environment variables are exposed for GitHub Actions.
  *
  * See https://bit.ly/2WlFUD7 for more information.
  */
-const { GITHUB_WORKSPACE } = process.env;
+const {GITHUB_WORKSPACE} = process.env;
 
 export async function run(actionInput: input.Input): Promise<void> {
   const workdir = core.getInput('workdir') || '.';
@@ -31,13 +29,13 @@ export async function run(actionInput: input.Input): Promise<void> {
             cwd,
             ignoreReturnCode: true,
             env: {
-              "PATH": `${process.env["PATH"]}:/home/runner/.local/share/gem/ruby/3.0.0/bin`
+              PATH: `${process.env['PATH']}:/home/runner/.local/share/gem/ruby/3.0.0/bin`
             }
           }
         );
 
         const vale_code = output.exitCode;
-        'Vale return code: ${vale_code}'
+        'Vale return code: ${vale_code}';
         // Check for fatal runtime errors only (exit code 2)
         // These aren't linting errors, but ones that will come
         // about from missing or bad configuration files, etc.
@@ -58,7 +56,8 @@ export async function run(actionInput: input.Input): Promise<void> {
             `-reporter=${core.getInput('reporter')}`,
             `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
+            `-level=${
+              vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
             }`
           ],
           {
