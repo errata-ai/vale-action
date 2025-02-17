@@ -129,15 +129,16 @@ with:
   reporter: github-pr-check
 ```
 
-### `fail_on_error` (default: false)
+### `fail_level` (default: error)
 
-By default, `reviewdog` will return exit code `0` even if it finds errors. If 
-`fail_on_error` is enabled, `reviewdog` exits with `1` when at least one error
-was reported.
+Controls the exit code of `reviewdog` depending on the severity of issues reported by Vale. For example, if
+`fail_level: warning`, then `reviewdog` will exit with 0 when all alerts have `info` severity, while it will exit with
+1 if there are any alerts with `error`, `warning`, or `unknown` severity.
 
 ```yaml
 with:
-  fail_on_error: true
+  # none, any, error, warning, info
+  fail_level: error
 ```
 
 ### `filter_mode` (default: added)

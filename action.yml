@@ -26,15 +26,23 @@ inputs:
     required: false
     default: "github-pr-annotations"
 
+  fail_level:
+    description: |
+      Default is 'error'.
+      Level which causes the check to fail [none,any,error,warning,info]
+    required: false
+    default: error
+
   fail_on_error:
     description: |
+      Deprecated. Use `fail_level` instead.
       Exit code for reviewdog when errors are found [true,false]
       Default is `false`.
     required: false
     default: "false"
 
   level:
-    description: "Report level for reviewdog [info,warning,error]."
+    description: "This parameter is ignored. Report level for reviewdog [info,warning,error]."
     required: false
     default: "error"
 

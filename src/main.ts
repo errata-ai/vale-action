@@ -45,6 +45,7 @@ export async function run(actionInput: input.Input): Promise<void> {
           return 2; // Exit the function early
         }
 
+        const fail_level = core.getInput('fail_level');
         const should_fail = core.getInput('fail_on_error');
 
         // Pipe to reviewdog ...
@@ -56,9 +57,11 @@ export async function run(actionInput: input.Input): Promise<void> {
             '-f=rdjsonl',
             `-name=vale`,
             `-reporter=${core.getInput('reporter')}`,
+            `-fail-level=${fail_level}`,
             `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
+            `-level=${
+              vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
             }`
           ],
           {
