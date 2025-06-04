@@ -84,7 +84,8 @@ block. For example:
 
 > NOTE: The provided version must be `>= 2.16.0`.
 
-Specify the Vale CLI version to use.
+Specify the Vale CLI version to use. If `none`, any preinstalled version of vale
+is used.
 
 ```yaml
 with:
