@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
 import path from 'path';
 
@@ -63,7 +64,31 @@ export function getSupportedSystem(): SupportedSystem {
   throw new Error(`Unsupported system: ${JSON.stringify(system)}`);
 }
 
+async function lookupLint(): Promise<string> {
+  let path = '';
+  let stderr = '';
+
+  let resp = await exec.exec('which', ['vale'], {
+    listeners: {
+      stdout: (buffer: Buffer) => (path = buffer.toString().trim()),
+      stderr: (data: Buffer) => (stderr += data.toString())
+    }
+  });
+
+  if (resp !== 0) {
+    core.setFailed(stderr);
+  }
+
+  core.info(`Using the install at ${path}`)
+  return path;
+}
+
 export async function installLint(version: string): Promise<string> {
+  if (version === 'none') {
+    core.info(`Assuming a version of vale is already available.`);
+    return await lookupLint();
+  }
+
   const supportedSystem = getSupportedSystem();
   core.info(`Installing Vale version '${version}' ...`);
   if (version === 'latest') {
