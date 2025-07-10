@@ -57,7 +57,10 @@ const supportedSystems: SupportedSystem[] = [
 
 export function getSupportedSystem(): SupportedSystem {
   for (const supportedSystem of supportedSystems) {
-    if (supportedSystem.system.os === system.os && supportedSystem.system.arch === system.arch) {
+    if (
+      supportedSystem.system.os === system.os &&
+      supportedSystem.system.arch === system.arch
+    ) {
       return supportedSystem;
     }
   }
@@ -79,7 +82,7 @@ async function lookupLint(): Promise<string> {
     core.setFailed(stderr);
   }
 
-  core.info(`Using the install at ${path}`)
+  core.info(`Using the install at ${path}`);
   return path;
 }
 
