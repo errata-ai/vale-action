@@ -3,6 +3,16 @@
 > :octocat: The official GitHub Action for Vale -- install, manage, and run Vale
 > with ease.
 
+> [!IMPORTANT]
+> **This repository has moved to [`vale-cli/vale-action`](https://github.com/vale-cli/vale-action).**
+>
+> The `errata-ai` organization has been renamed to `vale-cli`. You must update your workflows to continue using the action:
+>
+> ```diff
+> - uses: errata-ai/vale-action@v2
+> + uses: vale-cli/vale-action@v2
+> ```
+
 <p align="center">
   <img width="50%" alt="A demo screenshot." src="https://user-images.githubusercontent.com/8785025/85236358-272d3680-b3d2-11ea-8793-0f45cb70189a.png">
 </p>
