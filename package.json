@@ -26,9 +26,9 @@
     },
     "homepage": "https://github.com/errata-ai/vale-action",
     "dependencies": {
-        "@actions/core": "^3.0.1",
-        "@actions/exec": "^3.0.0",
-        "@actions/tool-cache": "^4.0.0",
+        "@actions/core": "^2.0.3",
+        "@actions/exec": "^2.0.0",
+        "@actions/tool-cache": "^3.0.1",
         "@types/node-fetch": "^2.6.13",
         "node-fetch": "^2.7.0"
     },
