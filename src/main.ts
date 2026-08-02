@@ -1,5 +1,7 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as input from './input';
 import { createFixer } from './fix';
@@ -51,6 +53,61 @@ const TOO_MANY = 'Too many results (annotations) in diff';
  */
 function atAnnotationLimit(stdout: string, stderr: string): boolean {
   return stdout.includes(TOO_MANY) || stderr.includes(TOO_MANY);
+}
+
+/**
+ * `eventPath` is the event payload to hand reviewdog.
+ *
+ * reviewdog takes the repository's owner and name from the payload and from
+ * nowhere else -- there's no fall back to `GITHUB_REPOSITORY`, the way there
+ * is for the commit. A runner that writes a thin payload, as some do for a
+ * scheduled run, leaves it posting to `/repos///check-runs`.
+ *
+ * So when the payload doesn't name a repository, we hand reviewdog a copy
+ * that does. Everything else about it is left alone, and a payload that
+ * already names one is passed through untouched.
+ *
+ * See https://github.com/reviewdog/reviewdog/issues/832.
+ */
+function eventPath(): string | undefined {
+  const original = process.env['GITHUB_EVENT_PATH'];
+  const slug = process.env['GITHUB_REPOSITORY'];
+
+  if (!original || !slug || !fs.existsSync(original)) {
+    return original;
+  }
+
+  let event: { repository?: { name?: string; owner?: { login?: string } } };
+  try {
+    event = JSON.parse(fs.readFileSync(original, 'utf8'));
+  } catch (error) {
+    core.debug(`Unable to read ${original}: ${error}`);
+    return original;
+  }
+
+  if (event.repository?.name && event.repository?.owner?.login) {
+    return original;
+  }
+
+  const [owner, name] = slug.split('/');
+  if (!owner || !name) {
+    return original;
+  }
+
+  event.repository = {
+    ...event.repository,
+    name,
+    owner: { ...event.repository?.owner, login: owner }
+  };
+
+  const patched = path.join(
+    process.env['RUNNER_TEMP'] || os.tmpdir(),
+    'vale-action-event.json'
+  );
+  fs.writeFileSync(patched, JSON.stringify(event));
+
+  core.debug(`The event payload doesn't name a repository; using ${patched}.`);
+  return patched;
 }
 
 /**
@@ -213,6 +270,7 @@ export async function run(actionInput: input.Input): Promise<void> {
               diagnostics.map(d => JSON.stringify(d)).join('\n'),
               'utf-8'
             ),
+            env: { ...process.env, GITHUB_EVENT_PATH: eventPath() || '' },
             ignoreReturnCode: true
           }
         );
