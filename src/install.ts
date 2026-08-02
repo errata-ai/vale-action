@@ -1,7 +1,8 @@
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
-import fetch from 'node-fetch';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
 import path from 'path';
 
 const releases = 'https://github.com/vale-cli/vale/releases/download';
@@ -50,6 +51,41 @@ function platform(tool: string, names: Record<string, string>): string {
   }
 
   return name;
+}
+
+/**
+ * `verify` checks a download against the release's own checksums.
+ *
+ * We're fetching an executable over the network and then running it, so it's
+ * worth knowing that what arrived is what was published.
+ */
+export async function verify(
+  archivePath: string,
+  checksums: string,
+  asset: string
+): Promise<void> {
+  const listPath = await tc.downloadTool(checksums);
+  const lines = fs.readFileSync(listPath, 'utf8').split('\n');
+
+  // sha256sum's own format: the digest, whitespace, then the file name.
+  const line = lines.find(l => l.trim().endsWith(` ${asset}`));
+  if (line === undefined) {
+    throw new Error(`'${asset}' isn't listed in ${checksums}.`);
+  }
+  const want = line.trim().split(/\s+/)[0];
+
+  const hash = crypto.createHash('sha256');
+  hash.update(fs.readFileSync(archivePath));
+  const got = hash.digest('hex');
+
+  if (got !== want) {
+    throw new Error(
+      `'${asset}' doesn't match its published checksum ` +
+        `(expected ${want}, got ${got}).`
+    );
+  }
+
+  core.debug(`Verified ${asset} against ${checksums}.`);
 }
 
 /**
@@ -107,9 +143,9 @@ export async function installLint(version: string): Promise<string> {
 
   core.info(`Installing Vale version '${version}' ...`);
   if (version === 'latest') {
+    // The releases page redirects to the newest tag; where we land names it.
     const response = await fetch(last);
-    const vs = response.url;
-    const parts = vs.split(`/`);
+    const parts = response.url.split(`/`);
     version = parts[parts.length - 1].substring(1);
   }
 
@@ -121,11 +157,16 @@ export async function installLint(version: string): Promise<string> {
     return hit;
   }
 
-  const asset = platform('Vale', valePlatforms);
   const ext = isWindows ? 'zip' : 'tar.gz';
+  const name = `vale_${version}_${platform('Vale', valePlatforms)}.${ext}`;
 
-  const url = releases + `/v${version}/vale_${version}_${asset}.${ext}`;
+  const url = `${releases}/v${version}/${name}`;
   const archivePath = await tc.downloadTool(url);
+  await verify(
+    archivePath,
+    `${releases}/v${version}/vale_${version}_checksums.txt`,
+    name
+  );
 
   const extracted = await unpack(archivePath, 'vale', ext);
   const dir = await tc.cacheDir(path.dirname(extracted), 'vale', version);
@@ -143,8 +184,11 @@ export async function installReviewDog(
   core.info(`Installing ReviewDog version '${version}' ...`);
 
   // A build we were handed the URL for isn't the version we'd be filing it
-  // under, so it doesn't go in the cache.
+  // under, and has no checksums we know of, so it skips both.
   const custom = url !== undefined && url !== '';
+  const dl = `https://github.com/reviewdog/reviewdog/releases/download/v${version}`;
+
+  let name = '';
   if (!custom) {
     const hit = cached('reviewdog', version);
     if (hit !== '') {
@@ -152,13 +196,14 @@ export async function installReviewDog(
       return hit;
     }
 
-    const asset = platform('reviewdog', reviewdogPlatforms);
-    url =
-      `https://github.com/reviewdog/reviewdog/releases/download/v${version}` +
-      `/reviewdog_${version}_${asset}.tar.gz`;
+    name = `reviewdog_${version}_${platform('reviewdog', reviewdogPlatforms)}.tar.gz`;
+    url = `${dl}/${name}`;
   }
 
   const archivePath = await tc.downloadTool(url as string);
+  if (!custom) {
+    await verify(archivePath, `${dl}/checksums.txt`, name);
+  }
 
   const extracted = await unpack(archivePath, 'reviewdog', 'tar.gz');
   const dir = custom

@@ -314,10 +314,21 @@ with:
   debug: true
 ```
 
+### `reviewdog_version` (default: 0.21.0)
+
+The `reviewdog` release to install. The action checks each download against
+the release's published checksums.
+
+```yaml
+with:
+  reviewdog_version: 0.21.0
+```
+
 ### `reviewdog_url` (default: "")
 
-A URL to a `tar.gz` build of `reviewdog` to use in place of the pinned
-release. A build named this way skips the runner's tool cache.
+A URL to a `tar.gz` build of `reviewdog` to use in place of the published
+release. A build named this way skips both the tool cache and the checksum
+check, since neither has anything to say about it.
 
 ```yaml
 with:

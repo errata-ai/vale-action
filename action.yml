@@ -90,6 +90,11 @@ inputs:
     required: false
     default: ""
 
+  reviewdog_version:
+    description: "The reviewdog version to install."
+    required: false
+    default: "0.21.0"
+
   reviewdog_url:
     description: "The URL to a tar.gz build of reviewdog to use in the action"
     required: false
@@ -102,4 +107,4 @@ inputs:
 
 runs:
   using: "node24"
-  main: "lib/main.js"
+  main: "dist/index.js"

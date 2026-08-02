@@ -2,12 +2,11 @@
     "name": "vale-action",
     "version": "1.0.4",
     "description": "The official GitHub Action for Vale -- install, manage, and run Vale with ease.",
-    "main": "lib/main.js",
+    "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
-        "build-min": "ncc build src/main.ts --minify",
-        "format": "prettier --write **/*.ts",
-        "test": "jest"
+        "build": "ncc build src/main.ts -o dist --minify",
+        "format": "prettier --write src/*.ts",
+        "lint": "tsc --noEmit"
     },
     "repository": {
         "type": "git",
@@ -29,9 +28,7 @@
         "@actions/core": "^2.0.3",
         "@actions/exec": "^2.0.0",
         "@actions/io": "^2.0.0",
-        "@actions/tool-cache": "^3.0.1",
-        "@types/node-fetch": "^2.6.13",
-        "node-fetch": "^2.7.0"
+        "@actions/tool-cache": "^3.0.1"
     },
     "devDependencies": {
         "@types/node": "^24.12.4",

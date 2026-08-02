@@ -120,7 +120,10 @@ function flagsFromInputs(): string[] {
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
-  const localReviewDog = await installReviewDog("0.17.0", core.getInput('reviewdog_url'));
+  const localReviewDog = await installReviewDog(
+    core.getInput('reviewdog_version'),
+    core.getInput('reviewdog_url')
+  );
 
   // `vale_flags` comes last so that it still has the final say on anything
   // it names twice.

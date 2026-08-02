@@ -10,3 +10,5 @@ tsconfig.tsbuildinfo
 !.github/styles/config/vocabularies/Base
 
 .idea
+node_modules
+lib

@@ -1,0 +1,28 @@
+name: bundle
+
+on: [push, pull_request]
+
+jobs:
+  # `dist/` is what GitHub runs -- there's no build step at run time -- so a
+  # bundle that lags behind `src/` ships the wrong code.
+  check:
+    name: dist is current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+      - name: Check for uncommitted changes
+        run: |
+          if ! git diff --exit-code --stat dist/; then
+            echo "::error::dist/ is out of date; run 'npm run build' and commit the result."
+            exit 1
+          fi
