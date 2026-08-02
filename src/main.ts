@@ -28,6 +28,32 @@ const NAMES_RULE = ['github-annotations', 'github-pr-annotations'];
 const { GITHUB_WORKSPACE } = process.env;
 
 /**
+ * Where `gem install --user-install` puts its binaries on the Linux runners.
+ *
+ * Vale shells out to Asciidoctor for AsciiDoc, and a user-installed gem isn't
+ * on the PATH we inherit.
+ */
+const GEM_BIN = '/home/runner/.local/share/gem/ruby/3.0.0/bin';
+
+/**
+ * `valeEnv` is our own environment, plus wherever the markup parsers live.
+ *
+ * It has to be the whole environment: handing `exec` a lone PATH would drop
+ * everything Vale reads from it -- `VALE_CONFIG_PATH`, `HOME`, the proxy
+ * settings -- and on Windows, enough of the environment to break the process
+ * outright.
+ */
+function valeEnv(): { [key: string]: string } {
+  const env = { ...process.env } as { [key: string]: string };
+
+  if (process.platform === 'linux') {
+    env['PATH'] = `${env['PATH']}${path.delimiter}${GEM_BIN}`;
+  }
+
+  return env;
+}
+
+/**
  * `convert` turns Vale's JSON into the `rdjsonl` that reviewdog reads.
  *
  * Alerts that Vale knows how to resolve become suggestions -- the same
@@ -95,9 +121,7 @@ export async function run(actionInput: input.Input): Promise<void> {
           {
             cwd,
             ignoreReturnCode: true,
-            env: {
-              "PATH": `${process.env["PATH"]}:/home/runner/.local/share/gem/ruby/3.0.0/bin`
-            }
+            env: valeEnv()
           }
         );
 

@@ -50,6 +50,9 @@ jobs:
 >
 > See the [Vale documentation][2] for more information.
 
+The action runs on the Linux, macOS, and Windows runners, on both x86-64 and
+ARM. The one gap is Windows on ARM, which Vale has no build for.
+
 ## Suggested fixes
 
 Vale knows how to resolve some of the alerts it reports -- a substitution
