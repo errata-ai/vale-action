@@ -73,6 +73,14 @@ A suggestion is only offered when the rule declares an [action][6] and the
 flagged text still matches what's in the file, so alerts that span markup are
 reported without one.
 
+> [!NOTE]
+> A pull request from a fork runs with a [read-only token][10], and posting a
+> review comment is a write. Suggestions -- and the `github-pr-check` and
+> `github-check` reporters, which write a check run -- are unavailable there.
+>
+> The default reporter still annotates a fork's pull request: it writes those
+> through the runner's log rather than the API, which needs no write access.
+
 ## Repository Structure
 
 The recommended repository structure makes use of the existing `.github` 
@@ -353,3 +361,4 @@ with:
 [7]: https://docs.vale.sh/keys/packages
 [8]: https://docs.vale.sh/topics/filters
 [9]: https://docs.vale.sh/guides/globbing
+[10]: https://docs.github.com/en/actions/concepts/security/github_token
