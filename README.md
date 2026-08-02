@@ -333,12 +333,12 @@ with:
   token: ${{secrets.VALE_GITHUB_TOKEN}}
 ```
 
-[1]: https://help.github.com/en/github/automating-your-workflow-with-github-actions/configuring-a-workflow
-[2]: https://vale.sh/docs/topics/scoping/#formats
-[3]: https://vale.sh/docs/topics/styles/
-[4]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
-[5]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request
-[6]: https://vale.sh/docs/topics/actions
-[7]: https://vale.sh/docs/packages
-[8]: https://vale.sh/docs/filters
-[9]: https://vale.sh/docs/cli
+[1]: https://docs.github.com/en/actions/how-tos/write-workflows
+[2]: https://docs.vale.sh/topics/scopes
+[3]: https://docs.vale.sh/keys/stylespath
+[4]: https://docs.github.com/en/actions/tutorials/authenticate-with-github_token
+[5]: https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request
+[6]: https://docs.vale.sh/topics/actions
+[7]: https://docs.vale.sh/keys/packages
+[8]: https://docs.vale.sh/topics/filters
+[9]: https://docs.vale.sh/guides/globbing
