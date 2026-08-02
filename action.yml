@@ -16,6 +16,13 @@ inputs:
     required: false
     default: all
 
+  sync:
+    description: |
+      Run `vale sync` before linting [true,false].
+      Set to `false` when the StylesPath is restored from a cache.
+    required: false
+    default: "true"
+
   debug:
     description: "Log debugging information to stdout."
     required: false

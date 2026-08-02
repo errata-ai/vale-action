@@ -99,6 +99,28 @@ MinAlertLevel = suggestion
 BasedOnStyles = Vale
 ```
 
+## Caching
+
+`vale sync` downloads every [package][7] your configuration names, every time
+it runs. To download them only when they change, restore the `StylesPath`
+from a cache and tell the action to skip the sync on a hit:
+
+```yaml
+- uses: actions/cache@v4
+  id: styles
+  with:
+    path: .github/styles
+    key: vale-${{ hashFiles('.vale.ini') }}
+
+- uses: vale-cli/vale-action@v2.1.1
+  with:
+    sync: ${{ steps.styles.outputs.cache-hit != 'true' }}
+```
+
+The Vale and `reviewdog` binaries go into the runner's tool cache, which a
+self-hosted runner keeps between jobs. The hosted runners start each job on a
+fresh machine, so there they're downloaded once per job.
+
 ## Inputs
 
 You can further customize the linting processing by providing one of the 
@@ -152,6 +174,16 @@ is determined by the input value `separator`:
     with:
       separator: ","
     ```
+
+### `sync` (default: true)
+
+Run `vale sync` before linting. Set to `false` when you restore the
+`StylesPath` from a cache yourself; see [Caching](#caching).
+
+```yaml
+with:
+  sync: false
+```
 
 ### `reporter` (default: github-pr-check)
 
@@ -214,3 +246,4 @@ with:
 [4]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
 [5]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request
 [6]: https://vale.sh/docs/topics/actions
+[7]: https://vale.sh/docs/packages

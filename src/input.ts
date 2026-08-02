@@ -67,18 +67,24 @@ export async function get(tok: string, dir: string): Promise<Input> {
   version = version.split(' ').slice(-1)[0];
   logIfDebug(`Using Vale ${version}`);
 
-  let stderr = '';
-  let resp = await exec.exec(localVale, [...parse(valeFlags), 'sync'], {
-    cwd: dir,
-    listeners: {
-      stderr: (data: Buffer) => {
-        stderr += data.toString();
+  // `sync` re-downloads every package each time it runs, so a user who has
+  // restored their `StylesPath` from a cache needs a way to say so.
+  if (core.getInput('sync') !== 'false') {
+    let stderr = '';
+    let resp = await exec.exec(localVale, [...parse(valeFlags), 'sync'], {
+      cwd: dir,
+      listeners: {
+        stderr: (data: Buffer) => {
+          stderr += data.toString();
+        }
       }
-    }
-  });
+    });
 
-  if (resp !== 0) {
-    core.setFailed(stderr);
+    if (resp !== 0) {
+      core.setFailed(stderr);
+    }
+  } else {
+    logIfDebug('Skipping sync; using the existing StylesPath.');
   }
 
   // We convert Vale's JSON into reviewdog's format ourselves, rather than
