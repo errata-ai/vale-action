@@ -2,8 +2,23 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as path from 'path';
 import * as input from './input';
+import { createFixer } from './fix';
+import { Diagnostic, toDiagnostics, ValeOutput } from './rdjson';
 
+/**
+ * The reporters that can act on a suggested fix.
+ *
+ * Only a review comment can carry one; an annotation has nowhere to put it.
+ */
+const SUGGESTS = ['github-pr-review'];
 
+/**
+ * The reporters that drop a diagnostic's `code`.
+ *
+ * They log the message and nothing else, so the rule's name has to travel
+ * within the message itself.
+ */
+const NAMES_RULE = ['github-annotations', 'github-pr-annotations'];
 
 /**
  * These environment variables are exposed for GitHub Actions.
@@ -11,6 +26,56 @@ import * as input from './input';
  * See https://bit.ly/2WlFUD7 for more information.
  */
 const { GITHUB_WORKSPACE } = process.env;
+
+/**
+ * `convert` turns Vale's JSON into the `rdjsonl` that reviewdog reads.
+ *
+ * Alerts that Vale knows how to resolve become suggestions -- the same
+ * replacements the language server offers as quick fixes -- which reviewers
+ * can commit straight from the pull request.
+ */
+async function convert(
+  stdout: string,
+  cwd: string,
+  reporter: string,
+  actionInput: input.Input
+): Promise<string> {
+  const trimmed = stdout.trim();
+  if (trimmed === '') {
+    return '';
+  }
+
+  let output: ValeOutput;
+  try {
+    output = JSON.parse(trimmed);
+  } catch (error) {
+    throw new Error(
+      `Unable to read Vale's output: ${trimmed.substring(0, 500)}`
+    );
+  }
+
+  const suggests = SUGGESTS.includes(reporter);
+  if (!suggests) {
+    core.debug(`The '${reporter}' reporter can't show suggested fixes.`);
+  }
+
+  const diagnostics: Diagnostic[] = await toDiagnostics(output, {
+    cwd,
+    nameRuleInMessage: NAMES_RULE.includes(reporter),
+    fix: suggests
+      ? createFixer(actionInput.exePath, cwd, actionInput.flags)
+      : undefined
+  });
+
+  const fixable = diagnostics.filter(d => d.suggestions).length;
+  if (fixable > 0) {
+    core.info(
+      `Vale suggested a fix for ${fixable} of ${diagnostics.length} alerts.`
+    );
+  }
+
+  return diagnostics.map((d) => JSON.stringify(d)).join('\n');
+}
 
 export async function run(actionInput: input.Input): Promise<void> {
   const workdir = core.getInput('workdir') || '.';
@@ -37,7 +102,8 @@ export async function run(actionInput: input.Input): Promise<void> {
         );
 
         const vale_code = output.exitCode;
-        'Vale return code: ${vale_code}'
+        core.debug(`Vale return code: ${vale_code}`);
+
         // Check for fatal runtime errors only (exit code 2)
         // These aren't linting errors, but ones that will come
         // about from missing or bad configuration files, etc.
@@ -46,6 +112,9 @@ export async function run(actionInput: input.Input): Promise<void> {
         }
 
         const should_fail = core.getInput('fail_on_error');
+        const reporter = core.getInput('reporter');
+
+        const diagnostics = await convert(output.stdout, cwd, reporter, actionInput);
 
         // Pipe to reviewdog ...
         core.info('Calling reviewdog 🐶');
@@ -55,7 +124,7 @@ export async function run(actionInput: input.Input): Promise<void> {
           [
             '-f=rdjsonl',
             `-name=vale`,
-            `-reporter=${core.getInput('reporter')}`,
+            `-reporter=${reporter}`,
             `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
             `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
@@ -63,7 +132,7 @@ export async function run(actionInput: input.Input): Promise<void> {
           ],
           {
             cwd,
-            input: Buffer.from(output.stdout, 'utf-8'),
+            input: Buffer.from(diagnostics, 'utf-8'),
             ignoreReturnCode: true
           }
         );

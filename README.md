@@ -50,6 +50,26 @@ jobs:
 >
 > See the [Vale documentation][2] for more information.
 
+## Suggested fixes
+
+Vale knows how to resolve some of the alerts it reports -- a substitution
+knows what to swap in, a spelling error has candidate spellings -- which the
+action offers as [suggested changes][5] that reviewers can commit from the
+pull request itself.
+
+This requires the `github-pr-review` reporter, since it's the only one that
+posts review comments:
+
+```yaml
+- uses: vale-cli/vale-action@v2.1.1
+  with:
+    reporter: github-pr-review
+```
+
+A suggestion is only offered when the rule declares an [action][6] and the
+flagged text still matches what's in the file, so alerts that span markup are
+reported without one.
+
 ## Repository Structure
 
 The recommended repository structure makes use of the existing `.github` 
@@ -189,3 +209,5 @@ with:
 [2]: https://vale.sh/docs/topics/scoping/#formats
 [3]: https://vale.sh/docs/topics/styles/
 [4]: https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+[5]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request
+[6]: https://vale.sh/docs/topics/actions

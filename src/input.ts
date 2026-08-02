@@ -24,6 +24,9 @@ export function parse(flags: string): string[] {
  * @workspace is the directory that Vale is run within.
  *
  * @args are Vale's run-time arguments.
+ *
+ * @flags are the user's `vale_flags`, which we also need on their own to ask
+ * Vale about individual alerts.
  */
 export interface Input {
   token: string;
@@ -31,6 +34,7 @@ export interface Input {
   exePath: string;
   reviewdogPath: string;
   args: string[];
+  flags: string[];
 }
 
 /**
@@ -77,10 +81,11 @@ export async function get(tok: string, dir: string): Promise<Input> {
     core.setFailed(stderr);
   }
 
-  let args: string[] = [
-    `--output=${path.resolve(__dirname, 'rdjsonl.tmpl')}`,
-    ...parse(valeFlags),
-  ];
+  // We convert Vale's JSON into reviewdog's format ourselves, rather than
+  // having Vale template it directly, so that we can ask Vale how to fix what
+  // it found.
+  const flags = parse(valeFlags);
+  let args: string[] = ['--output=JSON', ...flags];
 
   // Figure out what we're supposed to lint:
   const files = core.getInput('files');
@@ -113,6 +118,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     workspace: dir,
     exePath: localVale,
     args: args,
+    flags: flags,
     reviewdogPath: localReviewDog,
   };
 }
