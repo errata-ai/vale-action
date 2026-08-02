@@ -56,6 +56,55 @@ function atAnnotationLimit(stdout: string, stderr: string): boolean {
 }
 
 /**
+ * The first reviewdog that can fail on a severity rather than on anything.
+ */
+const FAIL_LEVEL_SINCE = [0, 21, 0];
+
+/**
+ * `atLeast` compares a reported version against one we need.
+ */
+function atLeast(version: string, minimum: number[]): boolean {
+  const parts = version.split('.').map(p => parseInt(p, 10));
+
+  for (let i = 0; i < minimum.length; i++) {
+    if (isNaN(parts[i])) {
+      return false;
+    } else if (parts[i] !== minimum[i]) {
+      return parts[i] > minimum[i];
+    }
+  }
+
+  return true;
+}
+
+/**
+ * `failFlag` tells reviewdog what should fail the run.
+ *
+ * `fail_on_error` says what it means: fail when Vale reports an error. But
+ * `-fail-on-error` only reads that way for the check reporters -- for every
+ * other one it fails on a finding of any severity, so a lone suggestion ends
+ * the run. `-fail-level` says which severity outright.
+ *
+ * Older builds have no such flag and would stop at the sight of it, so we ask
+ * the binary in hand rather than assume. That covers `reviewdog_url` too,
+ * where we have no version to go on.
+ */
+async function failFlag(exePath: string, shouldFail: string): Promise<string> {
+  const output = await exec.getExecOutput(exePath, ['-version'], {
+    silent: true,
+    ignoreReturnCode: true
+  });
+  const version = output.stdout.trim();
+
+  if (output.exitCode === 0 && atLeast(version, FAIL_LEVEL_SINCE)) {
+    return `-fail-level=${shouldFail === 'true' ? 'error' : 'none'}`;
+  }
+
+  core.debug(`reviewdog ${version} has no '-fail-level'; using '-fail-on-error'.`);
+  return `-fail-on-error=${shouldFail}`;
+}
+
+/**
  * `eventPath` is the event payload to hand reviewdog.
  *
  * reviewdog takes the repository's owner and name from the payload and from
@@ -260,7 +309,7 @@ export async function run(actionInput: input.Input): Promise<void> {
             '-f=rdjsonl',
             `-name=vale`,
             `-reporter=${reporter}`,
-            `-fail-on-error=${should_fail}`,
+            await failFlag(actionInput.reviewdogPath, should_fail),
             `-filter-mode=${core.getInput('filter_mode')}`,
             `-level=${reportLevel(vale_code, should_fail)}`
           ],

@@ -205,9 +205,9 @@ with:
 
 ### `fail_on_error` (default: false)
 
-By default, `reviewdog` will return exit code `0` even if it finds errors. If 
-`fail_on_error` is enabled, `reviewdog` exits with `1` when at least one error
-was reported.
+By default, the action succeeds whatever Vale reports. With `fail_on_error`,
+it fails when Vale reports an alert at the `error` level -- and only then, so
+a warning or a suggestion still passes.
 
 ```yaml
 with:
