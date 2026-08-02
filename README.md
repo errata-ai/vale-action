@@ -222,13 +222,68 @@ with:
 Space-delimited list of flags for the Vale CLI. To see a full list of available 
 flags, run `vale -h`.
 
-Note that flags should not include quotes.
-So while `--glob='*.txt'` works with Vale, it does not work with this action.
-Use the flag without quotes, as in the following example:
+Quotes group what they surround, as they would in a shell, so a flag can
+carry spaces of its own:
 
 ```yaml
 with:
-  vale_flags: "--glob=*.txt"
+  vale_flags: "--glob=*.txt --filter='.Level == \"error\"'"
+```
+
+A backslash means a backslash rather than an escape, so Windows paths need no
+special handling.
+
+### `level` (default: unset)
+
+The [report level](https://github.com/reviewdog/reviewdog#reporters) for
+`reviewdog`, which decides what a check reporter concludes: `error` fails the
+check, `info` and `warning` leave it neutral.
+
+```yaml
+with:
+  # info, warning, error
+  level: error
+```
+
+Left unset, the level follows `fail_on_error` and whether Vale found errors.
+
+### `workdir` (default: .)
+
+The directory to run Vale in, relative to the repository root. Use it when
+the `.vale.ini` lives somewhere other than the top level.
+
+```yaml
+with:
+  workdir: docs
+```
+
+### `separator` (default: "")
+
+The character that splits the `files` input into a list; see
+[`files`](#files-default-all).
+
+```yaml
+with:
+  separator: ","
+```
+
+### `debug` (default: false)
+
+Log the resolved Vale version and arguments.
+
+```yaml
+with:
+  debug: true
+```
+
+### `reviewdog_url` (default: "")
+
+A URL to a `tar.gz` build of `reviewdog` to use in place of the pinned
+release. A build named this way skips the runner's tool cache.
+
+```yaml
+with:
+  reviewdog_url: https://example.com/reviewdog.tar.gz
 ```
 
 ### `token` (default: [`secrets.GITHUB_TOKEN`][4])

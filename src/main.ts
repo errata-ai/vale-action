@@ -54,6 +54,24 @@ function valeEnv(): { [key: string]: string } {
 }
 
 /**
+ * `reportLevel` is what reviewdog should make of the alerts we hand it.
+ *
+ * For the check reporters, this decides the check's own conclusion: `error`
+ * fails it, `info` and `warning` leave it neutral.
+ *
+ * The input went unread for a long time, so an unset one keeps the behavior
+ * that grew up around that -- neutral unless Vale itself found errors and the
+ * user asked to fail on them.
+ */
+function reportLevel(valeCode: number, shouldFail: string): string {
+  const level = core.getInput('level');
+  if (level !== '') {
+    return level;
+  }
+  return valeCode === 1 && shouldFail === 'true' ? 'error' : 'info';
+}
+
+/**
  * `convert` turns Vale's JSON into the `rdjsonl` that reviewdog reads.
  *
  * Alerts that Vale knows how to resolve become suggestions -- the same
@@ -131,8 +149,13 @@ export async function run(actionInput: input.Input): Promise<void> {
         // Check for fatal runtime errors only (exit code 2)
         // These aren't linting errors, but ones that will come
         // about from missing or bad configuration files, etc.
+        //
+        // Vale says which on stderr, and that's the only thing that will tell
+        // the user what to fix.
         if (vale_code === 2) {
-          return 2; // Exit the function early
+          throw new Error(
+            output.stderr.trim() || 'Vale exited with a runtime error.'
+          );
         }
 
         const should_fail = core.getInput('fail_on_error');
@@ -151,8 +174,7 @@ export async function run(actionInput: input.Input): Promise<void> {
             `-reporter=${reporter}`,
             `-fail-on-error=${should_fail}`,
             `-filter-mode=${core.getInput('filter_mode')}`,
-            `-level=${vale_code == 1 && should_fail === 'true' ? 'error' : 'info'
-            }`
+            `-level=${reportLevel(vale_code, should_fail)}`
           ],
           {
             cwd,

@@ -41,9 +41,11 @@ inputs:
     default: "false"
 
   level:
-    description: "Report level for reviewdog [info,warning,error]."
+    description: |
+      Report level for reviewdog [info,warning,error].
+      Unset, the level follows `fail_on_error` and what Vale found.
     required: false
-    default: "error"
+    default: ""
 
   filter_mode:
     description: |
@@ -51,6 +53,11 @@ inputs:
       Default is added.
     required: false
     default: "added"
+
+  workdir:
+    description: "The directory to run Vale in."
+    required: false
+    default: "."
 
   vale_flags:
     description: "Space-delimited list of flags for the Vale CLI."
