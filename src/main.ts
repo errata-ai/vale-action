@@ -28,6 +28,32 @@ const NAMES_RULE = ['github-annotations', 'github-pr-annotations'];
 const { GITHUB_WORKSPACE } = process.env;
 
 /**
+ * How many annotations one step can create with a logging command.
+ *
+ * See https://github.com/reviewdog/reviewdog/blob/master/service/github/githubutils/comment_writer.go.
+ */
+const ANNOTATION_LIMIT = 10;
+
+/**
+ * What reviewdog says when it reaches that limit.
+ *
+ * The wording has held since 0.17, and only the code that hits the limit
+ * prints it -- which matters, because the failure it reports is worded the
+ * same as the ones we do want to fail on.
+ */
+const TOO_MANY = 'Too many results (annotations) in diff';
+
+/**
+ * `atAnnotationLimit` reports whether reviewdog gave up on showing them all.
+ *
+ * It fails the run when it does, to say that the rest won't appear -- which
+ * says nothing about the prose, and shouldn't decide the job either way.
+ */
+function atAnnotationLimit(stdout: string, stderr: string): boolean {
+  return stdout.includes(TOO_MANY) || stderr.includes(TOO_MANY);
+}
+
+/**
  * Where `gem install --user-install` puts its binaries on the Linux runners.
  *
  * Vale shells out to Asciidoctor for AsciiDoc, and a user-installed gem isn't
@@ -83,10 +109,10 @@ async function convert(
   cwd: string,
   reporter: string,
   actionInput: input.Input
-): Promise<string> {
+): Promise<Diagnostic[]> {
   const trimmed = stdout.trim();
   if (trimmed === '') {
-    return '';
+    return [];
   }
 
   let output: ValeOutput;
@@ -118,7 +144,7 @@ async function convert(
     );
   }
 
-  return diagnostics.map((d) => JSON.stringify(d)).join('\n');
+  return diagnostics;
 }
 
 export async function run(actionInput: input.Input): Promise<void> {
@@ -161,12 +187,17 @@ export async function run(actionInput: input.Input): Promise<void> {
         const should_fail = core.getInput('fail_on_error');
         const reporter = core.getInput('reporter');
 
-        const diagnostics = await convert(output.stdout, cwd, reporter, actionInput);
+        const diagnostics = await convert(
+          output.stdout,
+          cwd,
+          reporter,
+          actionInput
+        );
 
         // Pipe to reviewdog ...
         core.info('Calling reviewdog 🐶');
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
-        return await exec.exec(
+        const rdOutput = await exec.getExecOutput(
           actionInput.reviewdogPath,
           [
             '-f=rdjsonl',
@@ -178,10 +209,28 @@ export async function run(actionInput: input.Input): Promise<void> {
           ],
           {
             cwd,
-            input: Buffer.from(diagnostics, 'utf-8'),
+            input: Buffer.from(
+              diagnostics.map(d => JSON.stringify(d)).join('\n'),
+              'utf-8'
+            ),
             ignoreReturnCode: true
           }
         );
+
+        if (
+          rdOutput.exitCode !== 0 &&
+          should_fail !== 'true' &&
+          atAnnotationLimit(rdOutput.stdout, rdOutput.stderr)
+        ) {
+          core.warning(
+            `GitHub shows at most ${ANNOTATION_LIMIT} annotations per step, ` +
+              `and Vale reported ${diagnostics.length}. The rest are in the ` +
+              `log above; the 'github-pr-check' reporter has no such limit.`
+          );
+          return 0;
+        }
+
+        return rdOutput.exitCode;
       }
     );
 
