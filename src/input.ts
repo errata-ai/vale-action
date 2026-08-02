@@ -61,8 +61,8 @@ export function parse(flags: string): string[] {
  *
  * @args are Vale's run-time arguments.
  *
- * @flags are the user's `vale_flags`, which we also need on their own to ask
- * Vale about individual alerts.
+ * @flags are every Vale flag the user asked for, which we also need on their
+ * own to ask Vale about individual alerts.
  */
 export interface Input {
   token: string;
@@ -86,12 +86,45 @@ function logIfDebug(msg: string) {
 }
 
 /**
+ * The Vale flags that have an input of their own.
+ *
+ * All of them are reachable through `vale_flags`, but a filter expression
+ * carries quotes that then have to survive a YAML string, and a flag you have
+ * to look up isn't one you'll use.
+ */
+const namedFlags: [string, string][] = [
+  ['config', '--config'],
+  ['filter', '--filter'],
+  ['glob', '--glob'],
+  ['min_alert_level', '--minAlertLevel']
+];
+
+/**
+ * `flagsFromInputs` collects the named flags the user set.
+ */
+function flagsFromInputs(): string[] {
+  const flags: string[] = [];
+
+  for (const [name, flag] of namedFlags) {
+    const value = core.getInput(name);
+    if (value !== '') {
+      flags.push(`${flag}=${value}`);
+    }
+  }
+
+  return flags;
+}
+
+/**
  * Parse our user input and set up our Vale environment.
  */
 export async function get(tok: string, dir: string): Promise<Input> {
   const localVale = await installLint(core.getInput('version'));
   const localReviewDog = await installReviewDog("0.17.0", core.getInput('reviewdog_url'));
-  const valeFlags = core.getInput("vale_flags");
+
+  // `vale_flags` comes last so that it still has the final say on anything
+  // it names twice.
+  const flags = [...flagsFromInputs(), ...parse(core.getInput('vale_flags'))];
 
   let version = '';
   await exec.exec(localVale, ['-v'], {
@@ -107,7 +140,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
   // restored their `StylesPath` from a cache needs a way to say so.
   if (core.getInput('sync') !== 'false') {
     let stderr = '';
-    let resp = await exec.exec(localVale, [...parse(valeFlags), 'sync'], {
+    let resp = await exec.exec(localVale, [...flags, 'sync'], {
       cwd: dir,
       // Report what Vale said rather than the exit code `exec` would throw.
       ignoreReturnCode: true,
@@ -130,7 +163,6 @@ export async function get(tok: string, dir: string): Promise<Input> {
   // We convert Vale's JSON into reviewdog's format ourselves, rather than
   // having Vale template it directly, so that we can ask Vale how to fix what
   // it found.
-  const flags = parse(valeFlags);
   let args: string[] = ['--output=JSON', ...flags];
 
   // Figure out what we're supposed to lint:

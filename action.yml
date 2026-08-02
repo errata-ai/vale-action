@@ -59,6 +59,27 @@ inputs:
     required: false
     default: "."
 
+  config:
+    description: "A path to a .vale.ini file."
+    required: false
+    default: ""
+
+  filter:
+    description: |
+      An expression to filter rules by, such as `.Level == "error"`.
+    required: false
+    default: ""
+
+  glob:
+    description: 'A glob pattern, such as `*.{md,txt}`.'
+    required: false
+    default: ""
+
+  min_alert_level:
+    description: "The minimum level to report [suggestion,warning,error]."
+    required: false
+    default: ""
+
   vale_flags:
     description: "Space-delimited list of flags for the Vale CLI."
     required: false

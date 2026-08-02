@@ -217,13 +217,51 @@ with:
   filter_mode: nofilter
 ```
 
+### `config` (default: "")
+
+A path to the `.vale.ini` to lint with, for a configuration that doesn't sit
+where Vale would look for it.
+
+```yaml
+with:
+  config: docs/.vale.ini
+```
+
+### `filter` (default: "")
+
+An [expression][8] that decides which rules run. Report only errors, or only
+one style, without editing the configuration:
+
+```yaml
+with:
+  filter: '.Level == "error"'
+```
+
+### `glob` (default: "")
+
+A [glob pattern][9] limiting which files Vale reads.
+
+```yaml
+with:
+  glob: '*.{md,txt}'
+```
+
+### `min_alert_level` (default: "")
+
+The lowest level worth reporting: `suggestion`, `warning`, or `error`.
+
+```yaml
+with:
+  min_alert_level: warning
+```
+
 ### `vale_flags` (default: "")
 
 Space-delimited list of flags for the Vale CLI. To see a full list of available 
 flags, run `vale -h`.
 
-Quotes group what they surround, as they would in a shell, so a flag can
-carry spaces of its own:
+Anything without an input of its own goes here. Quotes group what they
+surround, as they would in a shell, so a flag can carry spaces:
 
 ```yaml
 with:
@@ -302,3 +340,5 @@ with:
 [5]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request
 [6]: https://vale.sh/docs/topics/actions
 [7]: https://vale.sh/docs/packages
+[8]: https://vale.sh/docs/filters
+[9]: https://vale.sh/docs/cli
