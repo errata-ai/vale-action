@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -55,6 +56,61 @@ function atAnnotationLimit(stdout: string, stderr: string): boolean {
   return stdout.includes(TOO_MANY) || stderr.includes(TOO_MANY);
 }
 
+interface Piped {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
+/**
+ * `pipe` runs a command with `input` on its standard input.
+ *
+ * `exec` can do that too, but it hands over the input without watching for an
+ * error, and a child that exits before reading all of it -- as reviewdog does
+ * the moment it decides it has nothing to report -- leaves the write failing
+ * with EPIPE, which takes this process down with it. The size of the report
+ * is what makes that felt: a small one fits in the pipe's buffer and is gone
+ * before the child can refuse it.
+ *
+ * Output is echoed as it arrives, since that's how the annotations reach the
+ * log, and collected so that we can read what reviewdog made of the run.
+ */
+function pipe(
+  command: string,
+  args: string[],
+  input: string,
+  options: { cwd: string; env: NodeJS.ProcessEnv }
+): Promise<Piped> {
+  core.info(`[command]${command} ${args.join(' ')}`);
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { cwd: options.cwd, env: options.env });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (data: Buffer) => {
+      stdout += data.toString();
+      process.stdout.write(data);
+    });
+
+    child.stderr.on('data', (data: Buffer) => {
+      stderr += data.toString();
+      process.stderr.write(data);
+    });
+
+    // Whatever the child didn't want to read, it didn't want to read.
+    child.stdin.on('error', () => {});
+
+    child.on('error', reject);
+    child.on('close', (code: number | null) => {
+      resolve({ exitCode: code === null ? 0 : code, stdout, stderr });
+    });
+
+    child.stdin.end(input);
+  });
+}
+
 /**
  * The first reviewdog that can fail on a severity rather than on anything.
  */
@@ -92,7 +148,9 @@ function atLeast(version: string, minimum: number[]): boolean {
 async function failFlag(exePath: string, shouldFail: string): Promise<string> {
   const output = await exec.getExecOutput(exePath, ['-version'], {
     silent: true,
-    ignoreReturnCode: true
+    ignoreReturnCode: true,
+    // Close its input rather than leave it waiting on a pipe nothing writes.
+    input: Buffer.alloc(0)
   });
   const version = output.stdout.trim();
 
@@ -303,7 +361,7 @@ export async function run(actionInput: input.Input): Promise<void> {
         // Pipe to reviewdog ...
         core.info('Calling reviewdog 🐶');
         process.env['REVIEWDOG_GITHUB_API_TOKEN'] = core.getInput('token');
-        const rdOutput = await exec.getExecOutput(
+        const rdOutput = await pipe(
           actionInput.reviewdogPath,
           [
             '-f=rdjsonl',
@@ -313,14 +371,10 @@ export async function run(actionInput: input.Input): Promise<void> {
             `-filter-mode=${core.getInput('filter_mode')}`,
             `-level=${reportLevel(vale_code, should_fail)}`
           ],
+          diagnostics.map(d => JSON.stringify(d)).join('\n'),
           {
             cwd,
-            input: Buffer.from(
-              diagnostics.map(d => JSON.stringify(d)).join('\n'),
-              'utf-8'
-            ),
-            env: { ...process.env, GITHUB_EVENT_PATH: eventPath() || '' },
-            ignoreReturnCode: true
+            env: { ...process.env, GITHUB_EVENT_PATH: eventPath() || '' }
           }
         );
 
