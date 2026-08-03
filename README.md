@@ -10,8 +10,13 @@
 >
 > ```diff
 > - uses: errata-ai/vale-action@v2
-> + uses: vale-cli/vale-action@v2
+> + uses: vale-cli/vale-action@v3
 > ```
+
+> [!WARNING]
+> Pinning the `reviewdog` branch (`vale-cli/vale-action@reviewdog`) tracks
+> whatever lands there next. Pin `@v3` for this release, or `@v2` to stay on
+> the previous one.
 
 <p align="center">
   <img width="50%" alt="A demo screenshot." src="https://user-images.githubusercontent.com/8785025/85236358-272d3680-b3d2-11ea-8793-0f45cb70189a.png">
@@ -31,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: vale-cli/vale-action@v2.1.1
+      - uses: vale-cli/vale-action@v3
 ```
 
 > [!TIP]
@@ -64,7 +69,7 @@ This requires the `github-pr-review` reporter, since it's the only one that
 posts review comments:
 
 ```yaml
-- uses: vale-cli/vale-action@v2.1.1
+- uses: vale-cli/vale-action@v3
   with:
     reporter: github-pr-review
 ```
@@ -120,7 +125,7 @@ from a cache and tell the action to skip the sync on a hit:
     path: .github/styles
     key: vale-${{ hashFiles('.vale.ini') }}
 
-- uses: vale-cli/vale-action@v2.1.1
+- uses: vale-cli/vale-action@v3
   with:
     sync: ${{ steps.styles.outputs.cache-hit != 'true' }}
 ```
@@ -138,7 +143,7 @@ To add an input, edit your workflow file and add the `with` key to the `uses`
 block. For example:
 
 ```yaml
-- uses: vale-cli/vale-action@v2.1.1
+- uses: vale-cli/vale-action@v3
   with:
     version: 2.17.0
 ```
