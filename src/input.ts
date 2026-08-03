@@ -185,8 +185,15 @@ export async function get(tok: string, dir: string): Promise<Input> {
       // e.g., '[".github/workflows/main.yml"]'
       args = args.concat(JSON.parse(files));
     } catch (e) {
+      // A pattern is the likeliest reason to be here: it works from a shell,
+      // which expands it before Vale ever sees it, and does nothing as an
+      // argument. Vale matches patterns of its own through `--glob`.
+      const hint = /[*?[]/.test(files)
+        ? ` Use the 'glob' input to match a pattern: glob: '${files}'.`
+        : '';
+
       core.warning(
-        `User-specified path (${files}) is invalid; falling back to 'all'.`
+        `User-specified path (${files}) is invalid; falling back to 'all'.${hint}`
       );
       args.push('.');
     }
