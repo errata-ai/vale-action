@@ -3,11 +3,46 @@ name: Update Major Version Tag
 on:
   push:
     tags:
-      - "v*"
+      # Both spellings: 2.1.2 was released without the `v`, and a filter that
+      # only matched `v*` left the major tag where it was without saying so.
+      - "v[0-9]*"
+      - "[0-9]*"
 
 jobs:
   update-majorver:
     name: Update Major Version Tag
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: nowactions/update-majorver@v1
+      - uses: actions/checkout@v4
+
+      - name: Move the major tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          major="v${version%%.*}"
+
+          # A tag we can't read a version out of should stop the run rather
+          # than move some other tag onto it.
+          case "$major" in
+            v[0-9]*) ;;
+            *) echo "::error::'$TAG' isn't a version tag."; exit 1 ;;
+          esac
+
+          # A prerelease is not what `@v2` should hand people.
+          case "$version" in
+            *-*) echo "'$TAG' is a prerelease; leaving $major alone."; exit 0 ;;
+          esac
+
+          # Keep both spellings, so pinning a patch version works either way.
+          if [ "$TAG" = "$version" ]; then
+            git tag -f "v$version" "$GITHUB_SHA"
+            git push -f origin "refs/tags/v$version"
+          fi
+
+          git tag -f "$major" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$major"
+
+          echo "Moved $major to $TAG ($GITHUB_SHA)."
