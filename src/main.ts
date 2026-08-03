@@ -146,6 +146,10 @@ function atLeast(version: string, minimum: number[]): boolean {
  * where we have no version to go on.
  */
 async function failFlag(exePath: string, shouldFail: string): Promise<string> {
+  // `fail_level` says the same thing with more of a range, so it wins where
+  // the user set one.
+  const level = core.getInput('fail_level');
+
   const output = await exec.getExecOutput(exePath, ['-version'], {
     silent: true,
     ignoreReturnCode: true,
@@ -155,7 +159,17 @@ async function failFlag(exePath: string, shouldFail: string): Promise<string> {
   const version = output.stdout.trim();
 
   if (output.exitCode === 0 && atLeast(version, FAIL_LEVEL_SINCE)) {
+    if (level !== '') {
+      return `-fail-level=${level}`;
+    }
     return `-fail-level=${shouldFail === 'true' ? 'error' : 'none'}`;
+  }
+
+  if (level !== '') {
+    core.warning(
+      `reviewdog ${version} has no '-fail-level'; 'fail_level' needs 0.21.0 ` +
+        `or later. Falling back to 'fail_on_error'.`
+    );
   }
 
   core.debug(`reviewdog ${version} has no '-fail-level'; using '-fail-on-error'.`);

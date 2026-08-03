@@ -40,6 +40,14 @@ inputs:
     required: false
     default: "false"
 
+  fail_level:
+    description: |
+      The severity at which reviewdog exits with `1`
+      [none,any,info,warning,error]. Takes precedence over `fail_on_error`,
+      and needs reviewdog 0.21.0 or later.
+    required: false
+    default: ""
+
   level:
     description: |
       Report level for reviewdog [info,warning,error].

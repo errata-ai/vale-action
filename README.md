@@ -214,6 +214,19 @@ with:
   fail_on_error: true
 ```
 
+### `fail_level` (default: unset)
+
+The severity at which the run fails: `none`, `any`, `info`, `warning`, or
+`error`. It takes precedence over `fail_on_error`, which is the same setting
+with two positions rather than five.
+
+```yaml
+with:
+  fail_level: warning
+```
+
+Needs reviewdog 0.21.0 or later; see [`reviewdog_version`](#reviewdog_version-default-0210).
+
 ### `filter_mode` (default: added)
 
 Set the [filter mode](https://github.com/reviewdog/reviewdog#filter-mode) for
