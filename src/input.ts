@@ -63,6 +63,9 @@ export function parse(flags: string): string[] {
  *
  * @flags are every Vale flag the user asked for, which we also need on their
  * own to ask Vale about individual alerts.
+ *
+ * @paths are what we were asked to lint. An empty one means the user asked
+ * for a list of files and gave us none.
  */
 export interface Input {
   token: string;
@@ -71,6 +74,7 @@ export interface Input {
   reviewdogPath: string;
   args: string[];
   flags: string[];
+  paths: string[];
 }
 
 /**
@@ -172,18 +176,25 @@ export async function get(tok: string, dir: string): Promise<Input> {
   const files = core.getInput('files');
   const delim = core.getInput('separator');
 
-  if (files == 'all') {
-    args.push('.');
+  let paths: string[] = [];
+
+  if (files.trim() === '') {
+    // A step that lists the changed files and finds none leaves us an empty
+    // string. That's an answer, not an oversight -- and passing it along as a
+    // path has Vale looking for a file with no name.
+    paths = [];
+  } else if (files == 'all') {
+    paths = ['.'];
   } else if (fs.existsSync(path.resolve(dir, files))) {
-    args.push(files);
+    paths = [files];
   } else if (delim !== "") {
-    args = args.concat(files.split(delim));
+    paths = files.split(delim);
   } else {
     try {
       // Support for an array of inputs.
       //
       // e.g., '[".github/workflows/main.yml"]'
-      args = args.concat(JSON.parse(files));
+      paths = JSON.parse(files);
     } catch (e) {
       // A pattern is the likeliest reason to be here: it works from a shell,
       // which expands it before Vale ever sees it, and does nothing as an
@@ -195,9 +206,13 @@ export async function get(tok: string, dir: string): Promise<Input> {
       core.warning(
         `User-specified path (${files}) is invalid; falling back to 'all'.${hint}`
       );
-      args.push('.');
+      paths = ['.'];
     }
   }
+
+  // A list can arrive with a trailing separator, or a stray one in the middle.
+  paths = paths.map(p => p.trim()).filter(p => p !== '');
+  args = args.concat(paths);
 
   logIfDebug(`Vale set-up complete; using '${args}' with ${localReviewDog}.`);
 
@@ -207,6 +222,7 @@ export async function get(tok: string, dir: string): Promise<Input> {
     exePath: localVale,
     args: args,
     flags: flags,
+    paths: paths,
     reviewdogPath: localReviewDog,
   };
 }

@@ -312,6 +312,11 @@ async function convert(
 }
 
 export async function run(actionInput: input.Input): Promise<void> {
+  if (actionInput.paths.length === 0) {
+    core.info('No files to lint.');
+    return;
+  }
+
   const workdir = core.getInput('workdir') || '.';
   const cwd = path.relative(
     process.env['GITHUB_WORKSPACE'] || process.cwd(),
