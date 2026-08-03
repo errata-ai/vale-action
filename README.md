@@ -225,7 +225,7 @@ with:
   fail_level: warning
 ```
 
-Needs reviewdog 0.21.0 or later; see [`reviewdog_version`](#reviewdog_version-default-0210).
+Needs `reviewdog` 0.21.0 or later; see [`reviewdog_version`](#reviewdog_version-default-0210).
 
 ### `filter_mode` (default: added)
 
